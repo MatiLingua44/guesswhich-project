@@ -6,3 +6,6 @@ source "https://rubygems.org"
 
 gem "sinatra"
 gem "rackup"
+gem "activerecord"
+gem "sqlite3"
+
