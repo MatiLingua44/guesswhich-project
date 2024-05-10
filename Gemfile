@@ -1,11 +1,16 @@
+# Gemfile
+ruby '3.0.2'
+
 # frozen_string_literal: true
 
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 # gem "rails"
 
-gem "sinatra"
-gem "rackup"
-gem "activerecord"
-gem "sqlite3"
+gem 'sinatra'
+gem 'rackup'
+gem 'activerecord'
+gem 'sinatra-activerecord'
+gem 'sqlite3', '~> 1.4'
+gem 'rake'
 
