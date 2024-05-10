@@ -17,22 +17,12 @@ class App < Sinatra::Application
     get '/' do
         'Welcome'
     end
-
-    class App < Sinatra::Application
-        def initialize(app = nil)
-          super()
-        end
-      
-        get '/' do
-          'Welcome'
-        end
-      
-        get '/users' do
-          @users = User.all
-          erb :'users/index'
-        end
+   
+    get '/users' do
+        @users = User.all
+        erb :'users/index'
     end
-
+    
     # Configure conection to the database
     configure do
         DB = SQLite3::Database.new 'database.db'
@@ -54,8 +44,9 @@ class App < Sinatra::Application
         username = params[:username]
         password = params[:password]
 
-        user = DB.execute('SELECT * FROM users WHERE username = ?', username).first
-        if user && user['password'] == password
+        existing_user = User.find_by(username:username)
+
+        if existing_user && existing_user['password'] == password
             redirect '/home'
         else
             "Credenciales incorrectas. Inténtalo de nuevo."
@@ -74,7 +65,12 @@ class App < Sinatra::Application
         if existing_user
             return "El nombre de usuario ya está en uso. Por favor, elige otro."
         end
-        
+
+        existing_email = User.find_by(email:email)
+        if existing_email
+            return "El email ya está siendo utilizado por otro usuario. Por favor, elige otro."
+        end
+
         # Insert the new user into the database
         User.create(names: names, username: username, email: email, password: password)
       
