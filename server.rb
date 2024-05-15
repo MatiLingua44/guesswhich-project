@@ -39,6 +39,11 @@ class App < Sinatra::Application
         erb :register
     end
 
+    get '/questions' do
+        @questions = Question.all
+        erb :'questions/show'
+    end
+
     # Manages the login request
     post '/login' do
         username = params[:username]
@@ -81,7 +86,7 @@ class App < Sinatra::Application
 
     # Homepage
     get '/home' do
-        "¡Bienvenido! Has iniciado sesión correctamente."
+        erb :home
     end
 end
 
