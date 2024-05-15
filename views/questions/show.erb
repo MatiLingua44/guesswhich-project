@@ -1,1 +1,13 @@
-
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Questions</title>
+</head>
+<body>
+    <ul>
+        <% @questions.each do |question| %>
+            <li><%= question.description %></li>
+        <% end %>
+    </ul>
+</body>
+</html>
