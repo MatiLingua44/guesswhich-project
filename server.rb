@@ -5,6 +5,7 @@ require 'sinatra/activerecord'
 require 'sqlite3'
 
 require './models/user'
+require './models/question'
 
 class App < Sinatra::Application
 
