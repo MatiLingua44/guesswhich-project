@@ -8,3 +8,13 @@ users = [
 users.each do |u|
   User.create(u)
 end
+
+questions = [
+  {description: '¿En qué año se desenvolvió la segunda guerra mundial?', difficulty: :medium},
+  {description: '¿En qué año se desenvolvió la primera guerra mundial?', difficulty: :easy},
+  {description: '¿En qué año se consagró campeón la seleccion argentina de futbol pro primera vez?', difficulty: :easy}
+]
+
+questions.each do |q|
+  Question.create(q)
+end
