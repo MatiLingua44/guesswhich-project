@@ -16,7 +16,7 @@ class App < Sinatra::Application
     end
 
     get '/' do
-        'Welcome'
+        erb :home
     end
    
     get '/users' do
@@ -85,9 +85,5 @@ class App < Sinatra::Application
         redirect '/home'
     end
 
-    # Homepage
-    get '/home' do
-        erb :home
-    end
 end
 
