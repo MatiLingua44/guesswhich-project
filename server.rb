@@ -16,13 +16,23 @@ class App < Sinatra::Application
         super()
     end
 
-    get '/' do
-        erb :home
+    configure do
+        enable :sessions
     end
 
-    get '/users' do
+    get '/' do
+        session.clear
+        erb :home
+
+    end
+
+    get '/ranking' do
         @users = User.all
-        erb :'users/index'
+        if session[:username]
+            erb :'/ranking'
+        else
+            redirect '/login'
+        end
     end
 
     # Shows the login page
@@ -38,19 +48,28 @@ class App < Sinatra::Application
     get '/questions' do
         @questions = Question.order("RANDOM()").first
         @answers = @questions.answers.all
-        erb :'questions/show'
-    end
-
-    post '/questions' do
-        existing_answer = Answer.find_by(id:params["answer"])
-        if existing_answer&.is_correct
-            redirect '/questions'
+        if session[:username]
+            erb :'questions/show'
         else
-            "respuesta incorrecta"
-            redirect '/'
+            redirect '/login'
         end
     end
 
+    post '/questions' do
+        if session[:username]
+            @users = User.find_by(username: session[:username])
+            existing_answer = Answer.find_by(id: params["answer"])
+            if existing_answer&.is_correct
+                @users.update(score: @users.score + 1)
+                redirect '/questions'
+            else
+                "respuesta incorrecta"
+                redirect '/menu'
+            end
+        else
+            redirect '/login'
+        end
+    end
 
     get '/menu' do
         erb :menu
@@ -64,9 +83,11 @@ class App < Sinatra::Application
         existing_user = User.find_by(username:username)
 
         if existing_user && existing_user['password'] == password
+            session[:username] = params[:username] # Almacenar el nombre de usuario en la sesión
+            puts session
             redirect '/menu'
         else
-            "Credenciales incorrectas. IntÃ©ntalo de nuevo."
+            redirect '/login'
         end
     end
 
