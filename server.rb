@@ -28,11 +28,7 @@ class App < Sinatra::Application
 
     get '/ranking' do
         @users = User.all
-        if session[:username]
-            erb :'/ranking'
-        else
-            redirect '/login'
-        end
+        erb :'/ranking'
     end
 
     # Shows the login page
@@ -115,6 +111,12 @@ class App < Sinatra::Application
       
         # Redirect to homepage after succesfully sign up
         redirect '/login'
+    end
+
+    before do
+        public_paths = ['/login', '/register', '/']
+        pass if public_paths.include?(request.path_info)
+        redirect '/login' unless session[:username]
     end
 
 end
