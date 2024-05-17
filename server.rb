@@ -6,6 +6,7 @@ require 'sqlite3'
 
 require './models/user'
 require './models/question'
+require './models/answer'
 
 class App < Sinatra::Application
 
@@ -18,16 +19,10 @@ class App < Sinatra::Application
     get '/' do
         erb :home
     end
-   
+
     get '/users' do
         @users = User.all
         erb :'users/index'
-    end
-    
-    # Configure conection to the database
-    configure do
-        DB = SQLite3::Database.new 'database.db'
-        DB.results_as_hash = true
     end
 
     # Shows the login page
@@ -41,8 +36,13 @@ class App < Sinatra::Application
     end
 
     get '/questions' do
-        @questions = Question.all
+        @questions = Question.order("RANDOM()").first
+        @answers = @questions.answers.all
         erb :'questions/show'
+    end
+
+    get '/menu' do
+        erb :menu
     end
 
     # Manages the login request
@@ -82,7 +82,7 @@ class App < Sinatra::Application
       
       
         # Redirect to homepage after succesfully sign up
-        redirect '/home'
+        redirect '/login'
     end
 
 end
