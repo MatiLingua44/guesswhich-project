@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Users</title>
+  <title>Ranking | Guesswhich</title>
   <style>
       body {
           font-family: Arial, sans-serif;
@@ -31,10 +31,33 @@
           border-radius: 8px;
           overflow: hidden;
       }
+      .button {
+          display: block;
+          width: 200px;
+          margin: 10px auto;
+          padding: 10px 20px;
+          font-size: 18px;
+          background-color: #4CAF50;
+          color: #fff;
+          text-align: center;
+          text-decoration: none;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+      }
+      .container {
+          text-align: center;
+          padding: 20px;
+          background-color: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      }
   </style>
 </head>
 <body>
 <div class="table-container">
+  <h1>Ranking table</h1>
   <table>
     <thead>
     <tr>
@@ -54,5 +77,13 @@
     </tbody>
   </table>
 </div>
+</body>
+
+<body>
+
+<div class="container">
+  <a href="/menu" class="button">Back</a>
+</div>
+
 </body>
 </html>
