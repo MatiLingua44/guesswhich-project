@@ -306,13 +306,6 @@ answers = Answer.create!([
 
                ])
 
-questions.each do |q|
-  Question.create(q)
-end
-
-answers.each do |a|
-  Answer.create(a)
-end
 
 
 
