@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pregunta de opción múltiple</title>
+<title>Guesswhich</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -57,19 +57,11 @@
     <h1><%= @questions.description %></h1>
     <p>Selecciona una respuesta:</p>
 
-    <div id="respuestas">
+    <form action="/questions" method = "post">
         <% @answers.each do |answer| %>
-            <button onclick="seleccionarRespuesta()"><%= answer.description %></button>
+            <button type= "submit"  id="answer"> <%= answer.description %></button>
         <% end %>
-    </div>
+    </form>
 </div>
-
-<script>
-    function seleccionarRespuesta(numeroRespuesta) {
-        // Aquí puedes hacer lo que quieras con la respuesta seleccionada
-        alert("Has seleccionado la respuesta " + numeroRespuesta);
-    }
-</script>
-
 </body>
 </html>
