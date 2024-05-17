@@ -41,6 +41,20 @@ class App < Sinatra::Application
         erb :'questions/show'
     end
 
+    post '/questions' do
+        answer = params[:answer]
+
+        existing_answer = Answer.find_by(answer)
+
+        if (existing_answer) && existing_answer.is_correct == true
+            redirect '/questions'
+        else
+            "respuesta incorrecta"
+            redirect '/'
+        end
+    end
+
+
     get '/menu' do
         erb :menu
     end
@@ -69,12 +83,12 @@ class App < Sinatra::Application
         # Verify if the username already exists
         existing_user = User.find_by(username:username)
         if existing_user
-            return "El nombre de usuario ya está en uso. Por favor, elige otro."
+            return "The username is already being used. Please insert a diferent one."
         end
 
         existing_email = User.find_by(email:email)
         if existing_email
-            return "El email ya está siendo utilizado por otro usuario. Por favor, elige otro."
+            return "The email is being used by another pearson. Please choose a new one."
         end
 
         # Insert the new user into the database
