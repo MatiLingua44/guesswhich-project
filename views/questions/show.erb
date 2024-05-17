@@ -57,11 +57,14 @@
     <h1><%= @questions.description %></h1>
     <p>Selecciona una respuesta:</p>
 
-    <form action="/questions" method = "post">
-        <% @answers.each do |answer| %>
-            <button type= "submit"  id="answer"> <%= answer.description %></button>
-        <% end %>
-    </form>
+
+     <% @answers.each do |answer| %>
+        <form action="/questions" method = "post">
+                <input type="hidden" name="answer" id=<%= answer.id %> value=<%= answer.id %> />
+                <button type= "submit"  id="answer"> <%= answer.description %></button>
+        </form>
+  <% end %>
+
 </div>
 </body>
 </html>
