@@ -42,11 +42,8 @@ class App < Sinatra::Application
     end
 
     post '/questions' do
-        answer = params[:answer]
-
-        existing_answer = Answer.find_by(answer)
-
-        if (existing_answer) && existing_answer.is_correct == true
+        existing_answer = Answer.find_by(id:params["answer"])
+        if existing_answer&.is_correct
             redirect '/questions'
         else
             "respuesta incorrecta"
@@ -67,9 +64,9 @@ class App < Sinatra::Application
         existing_user = User.find_by(username:username)
 
         if existing_user && existing_user['password'] == password
-            redirect '/home'
+            redirect '/menu'
         else
-            "Credenciales incorrectas. Inténtalo de nuevo."
+            "Credenciales incorrectas. IntÃ©ntalo de nuevo."
         end
     end
 
@@ -100,4 +97,3 @@ class App < Sinatra::Application
     end
 
 end
-
