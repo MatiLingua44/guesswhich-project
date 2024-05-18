@@ -23,7 +23,10 @@ class App < Sinatra::Application
     get '/' do
         session.clear
         erb :home
+    end
 
+    get '/menu' do
+        erb :menu
     end
 
     get '/ranking' do
@@ -41,34 +44,8 @@ class App < Sinatra::Application
         erb :register
     end
 
-    get '/questions' do
-        @questions = Question.order("RANDOM()").first
-        @answers = @questions.answers.all
-        if session[:username]
-            erb :'questions/show'
-        else
-            redirect '/login'
-        end
-    end
-
-    post '/questions' do
-        if session[:username]
-            @users = User.find_by(username: session[:username])
-            existing_answer = Answer.find_by(id: params["answer"])
-            if existing_answer&.is_correct
-                @users.update(score: @users.score + 1)
-                redirect '/questions'
-            else
-                "respuesta incorrecta"
-                redirect '/menu'
-            end
-        else
-            redirect '/login'
-        end
-    end
-
-    get '/menu' do
-        erb :menu
+    get '/gamemodes' do
+        erb :gamemodes
     end
 
     # Manages the login request
@@ -111,6 +88,30 @@ class App < Sinatra::Application
       
         # Redirect to homepage after succesfully sign up
         redirect '/login'
+    end
+
+    #Game modes implementation
+
+    get '/questions' do
+        @questions = Question.order("RANDOM()").first
+        @answers = @questions.answers.all
+        erb :'questions/show'
+    end
+
+    post '/questions' do
+        if session[:username]
+            @users = User.find_by(username: session[:username])
+            existing_answer = Answer.find_by(id: params["answer"])
+            if existing_answer&.is_correct
+                @users.update(score: @users.score + 1)
+                redirect '/questions'
+            else
+                "respuesta incorrecta"
+                redirect '/menu'
+            end
+        else
+            redirect '/login'
+        end
     end
 
     before do
