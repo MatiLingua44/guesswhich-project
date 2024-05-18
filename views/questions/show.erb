@@ -58,18 +58,16 @@
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
     <h1><%= @questions.description %></h1>
     <p>Selecciona una respuesta:</p>
 
-
-     <% @answers.each do |answer| %>
-        <form action="/questions" method = "post">
-                <input type="hidden" name="answer" id=<%= answer.id %> value=<%= answer.id %> />
-                <button type= "submit"  id="answer"> <%= answer.description %></button>
+    <% @answers.shuffle.each do |answer| %>
+        <form action="/questions" method="post">
+        <input type="hidden" name="answer" id="<%= answer.id %>" value="<%= answer.id %>" />
+        <button type="submit" id="answer"><%= answer.description %></button>
         </form>
-  <% end %>
-
-</div>
+    <% end %>
+    </div>
 </body>
 </html>
