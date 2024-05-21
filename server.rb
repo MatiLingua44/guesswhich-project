@@ -104,7 +104,7 @@ class App < Sinatra::Application
                      else
                          'hard'
                      end
-        @questions = Question.where.not(description: processed_questions).order("RANDOM()").first
+        @questions = Question.where.not(description: processed_questions).where(difficulty: difficulty).order("RANDOM()").first
 
         if @questions.nil?
              return "no questions available"
