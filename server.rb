@@ -91,7 +91,9 @@ class App < Sinatra::Application
     end
 
     #Game modes implementation
-
+    
+    processed_questions = []
+    
     get '/questions' do
         question_count = session[:question_count] || 0
         difficulty = case question_count
@@ -102,9 +104,15 @@ class App < Sinatra::Application
                      else
                          'hard'
                      end
-        @questions = Question.where(difficulty: difficulty).order("RANDOM()").first
-        @answers = @questions.answers.all
-        erb :'questions/show'
+        @questions = Question.where.not(description: processed_questions).order("RANDOM()").first
+
+        if @questions.nil?
+             return "no questions available"
+        else
+            processed_questions << @questions.description
+            @answers = @questions.answers.all
+            erb :'questions/show'
+         end
     end
 
     post '/questions' do
