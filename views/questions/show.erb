@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guesswhich</title>
+  <title>Normal Mode | Guesswhich!</title>
   <style>
       body {
           font-family: 'Roboto', sans-serif;
-          background-color: #f0f0f0;
+          background-image: url('https://wallpapercave.com/wp/wp9440197.jpg');
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-attachment: fixed;
           margin: 0;
           padding: 0;
           display: flex;
@@ -23,7 +27,7 @@
           padding: 20px;
           text-align: center;
           width: 1500px;
-          height: 350px;
+          height: 500px;
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -46,7 +50,7 @@
           margin: 10px auto;
           padding: 10px 20px;
           font-size: 16px;
-          background-color: #007bff;
+          background-color: #76b1bd;
           color: #fff;
           border: none;
           border-radius: 5px;
@@ -57,7 +61,7 @@
       }
 
       button:hover {
-          background-color: #0056b3;
+          background-color: rgba(118, 177, 189, 0.5);
       }
 
       #countdown {
@@ -94,6 +98,7 @@
       <button type="submit" id="answer"><%= answer.description %></button>
     </form>
   <% end %>
+  <a href="/menu" class="button">Back</a>
 </div>
 
 <script>
