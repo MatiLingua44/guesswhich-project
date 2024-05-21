@@ -93,7 +93,16 @@ class App < Sinatra::Application
     #Game modes implementation
 
     get '/questions' do
-        @questions = Question.order("RANDOM()").first
+        question_count = session[:question_count] || 0
+        difficulty = case question_count
+                     when 0..9
+                         'easy'
+                     when 10..19
+                         'medium'
+                     else
+                         'hard'
+                     end
+        @questions = Question.where(difficulty: difficulty).order("RANDOM()").first
         @answers = @questions.answers.all
         erb :'questions/show'
     end
@@ -103,10 +112,13 @@ class App < Sinatra::Application
             @users = User.find_by(username: session[:username])
             existing_answer = Answer.find_by(id: params["answer"])
             if existing_answer&.is_correct
+                session[:question_count] ||= 0
+                session[:question_count] += 1
                 @users.update(score: @users.score + 1)
                 redirect '/questions'
             else
                 "respuesta incorrecta"
+                session[:question_count] = 0
                 redirect '/menu'
             end
         else
