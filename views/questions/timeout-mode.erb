@@ -7,7 +7,11 @@
   <style>
       body {
           font-family: 'Roboto', sans-serif;
-          background-color: #f0f0f0;
+          background-image: url('https://wallpapercave.com/wp/wp9440197.jpg');
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-attachment: fixed;
           margin: 0;
           padding: 0;
           display: flex;
@@ -23,7 +27,7 @@
           padding: 20px;
           text-align: center;
           width: 1500px;
-          height: 450px;
+          height: 500px;
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -40,13 +44,13 @@
           color: #666;
           margin-bottom: 20px;
       }
-      
+
       button {
           display: block;
           margin: 10px auto;
           padding: 10px 20px;
           font-size: 16px;
-          background-color: #007bff;
+          background-color: #76b1bd;
           color: #fff;
           border: none;
           border-radius: 5px;
@@ -57,7 +61,7 @@
       }
 
       button:hover {
-          background-color: #0056b3;
+          background-color: rgba(118, 177, 189, 0.5);
       }
 
       #countdown {
@@ -80,45 +84,26 @@
               opacity: 1;
           }
       }
-
-      back {
-          display: block;
-          margin: 10px auto;
-          padding: 10px 20px;
-          font-size: 16px;
-          background-color: #007bff;
-          color: #fff;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-          width: 400px;
-          height: 40px;
-      }
-
   </style>
 </head>
 <body>
 
-<div class = "back">
-    <form action="/menu" method="get">
-    <button type="submit" class="button">Back</button>
-    </form>
-</div>
-
 <div class="container">
   <div id="countdown">100</div>
-  <h1><%= @questions.description %></h1>
-  <p>Selecciona una respuesta:</p>
+  <div id="question-container">
+    <h1><%= @questions.description %></h1>
+    <p>Selecciona una respuesta:</p>
 
-  <% @answers.shuffle.each do |answer| %>
-    <form action="/timeout-mode" method="post">
-      <input type="hidden" name="answer" id="<%= answer.id %>" value="<%= answer.id %>" />
-      <button type="submit" id="answer"><%= answer.description %></button>
+    <form id="answer-form">
+      <% @answers.shuffle.each do |answer| %>
+        <input type="hidden" name="answer" id="<%= answer.id %>" value="<%= answer.id %>" />
+        <button type="submit" id="answer"><%= answer.description %></button>
+      <% end %>
     </form>
-  <% end %>
-
+  </div>
+  <a href="/menu" class="button">Back</a>
 </div>
+
 <script>
     let timeLeft = 100;
     const countdownElement = document.getElementById('countdown');
@@ -132,6 +117,41 @@
             timeLeft--;
         }
     }, 1000);
+
+    function handleFormSubmit(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/timeout-mode', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    // Actualizar la pregunta y las respuestas sin reiniciar el temporizador
+                    const questionContainer = document.getElementById('question-container');
+                    questionContainer.innerHTML = `
+                    <h1>${data.question.description}</h1>
+                    <p>Selecciona una respuesta:</p>
+                    <form id="answer-form">
+                        ${data.answers.map(answer => `
+                            <input type="hidden" name="answer" id="${answer.id}" value="${answer.id}" />
+                            <button type="submit" id="answer">${answer.description}</button>
+                        `).join('')}
+                    </form>
+                `;
+                    // Volver a añadir el manejador de eventos para el nuevo formulario
+                    document.getElementById('answer-form').addEventListener('submit', handleFormSubmit);
+                }
+            });
+    }
+
+    // Añadir el manejador de eventos inicial
+    document.getElementById('answer-form').addEventListener('submit', handleFormSubmit);
 </script>
 </body>
 </html>
