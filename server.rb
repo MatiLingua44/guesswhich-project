@@ -46,16 +46,15 @@ class App < Sinatra::Application
         erb :register
     end
 
-    get '/second-world-war' do
-        erb :'second-world-war'
-    end
+    get '/learn-event' do
+        selected_event = session[:selected_event]
+        if selected_event == 0
+            @learnPdf = "util/industrial-revolution.pdf"
+        elsif selected_event == 1
+            @learnPdf = "util/industrial-revolution.pdf"
+        end
 
-    get '/learn-2nd-war' do
-        erb :'learn-second-war'
-    end
-
-    get '/industrial-revolution' do
-        erb :'industrial-revolution'
+        erb :'learn-event'
     end
 
     get '/learn-industrial' do
@@ -112,57 +111,34 @@ class App < Sinatra::Application
     
     processed_questions = []
 
-    get '/timeout-mode' do
-        @questions = Question.where.not(description: processed_questions).order("RANDOM()").first
+    post '/select_event' do
+        event = params[:event]
+        session[:selected_event] = event
 
-        if @questions.nil?
-            return "no questions available"
+        if event == '0'
+            @eventTitle = "Second World War"
+            erb :'show-event'
+        elsif event == '1'
+            @eventTitle = "Industrial Revolution"
+            erb :'show-event'
         else
-            processed_questions << @questions.description
-            @answers = @questions.answers.all
-            erb :'questions/timeout-mode'
-        end
-    end
-
-    post '/timeout-mode' do
-        content_type :json
-        if session[:username]
-            @users = User.find_by(username: session[:username])
-            existing_answer = Answer.find_by(id: params["answer"])
-            if existing_answer&.is_correct
-                session[:question_count] ||= 0
-                session[:question_count] += 1
-                @users.update(score: @users.score + 1)
-            end
-
-            @questions = Question.where.not(description: processed_questions).order("RANDOM()").first
-
-            if @questions.nil?
-                return { redirect: '/menu' }.to_json
-            else
-                processed_questions << @questions.description
-                @answers = @questions.answers.all
-                return { question: @questions, answers: @answers.map { |a| { id: a.id, description: a.description } } }.to_json
-            end
-        else
-            return { redirect: '/login' }.to_json
+            redirect '/menu'
         end
     end
 
     get '/questions' do
-        question_count = session[:question_count] || 0
-        difficulty = case question_count
-                     when 0..9
-                         'medium'
-                     when 10..19
-                         'medium'
-                     else
-                         'hard'
-                     end
-        @questions = Question.where.not(description: processed_questions).where(difficulty: difficulty).order("RANDOM()").first
+        selected_event = session[:selected_event]
+
+        if selected_event == '0'
+            @questions = Question.where(event: 0).order("RANDOM()").first
+        elsif selected_event == '1'
+            @questions = Question.where(event: 1).order("RANDOM()").first
+        else
+            @questions = Question.none
+        end
 
         if @questions.nil?
-             return "no questions available"
+            redirect '/finish'
         else
             processed_questions << @questions.description
             @answers = @questions.answers.all
