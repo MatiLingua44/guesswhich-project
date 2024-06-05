@@ -12,6 +12,7 @@ require './models/answer'
 class App < Sinatra::Application
 
     set :database_file, './config/database.yml'
+    set :public_folder, 'public'
 
     def initialize(app = nil)
         super()
@@ -43,6 +44,22 @@ class App < Sinatra::Application
     # Shows the sign in page
     get '/register' do
         erb :register
+    end
+
+    get '/second-world-war' do
+        erb :'second-world-war'
+    end
+
+    get '/learn-2nd-war' do
+        erb :'learn-second-war'
+    end
+
+    get '/industrial-revolution' do
+        erb :'industrial-revolution'
+    end
+
+    get '/learn-industrial' do
+        erb :'learn-industrial'
     end
 
     get '/gamemodes' do
@@ -136,7 +153,7 @@ class App < Sinatra::Application
         question_count = session[:question_count] || 0
         difficulty = case question_count
                      when 0..9
-                         'easy'
+                         'medium'
                      when 10..19
                          'medium'
                      else
@@ -150,21 +167,25 @@ class App < Sinatra::Application
             processed_questions << @questions.description
             @answers = @questions.answers.all
             erb :'questions/show'
-         end
+        end
     end
 
     post '/questions' do
         if session[:username]
-            @users = User.find_by(username: session[:username])
+            user = User.find_by(username: session[:username])
             existing_answer = Answer.find_by(id: params["answer"])
             if existing_answer&.is_correct
                 session[:question_count] ||= 0
                 session[:question_count] += 1
-                @users.update(score: @users.score + 1)
+                session[:user_score] ||= 0
+                session[:user_score] += 1
+                if user.score < session[:user_score]
+                    user.update(score: session[:user_score])
+                end
                 redirect '/questions'
             else
-                "respuesta incorrecta"
                 session[:question_count] = 0
+                session[:user_score] = 0
                 redirect '/menu'
             end
         else
