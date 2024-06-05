@@ -140,10 +140,8 @@ answers = Answer.create!([
                            { description: 'El bombardeo de Londres por Alemania', question: questions[21], is_correct: false },
                            { description: 'La invasión de Francia por las fuerzas aliadas', question: questions[21], is_correct: false },
                            { description: 'El genocidio perpetrado por el régimen nazi contra los judíos y otros grupos minoritarios', question: questions[21], is_correct: true },
-                           { description: 'La guerra de guerrillas en el sudeste asiático', question: questions[21], is_correct: false }
-                         ])
+                           { description: 'La guerra de guerrillas en el sudeste asiático', question: questions[21], is_correct: false },
 
-answers = Answer.create!([
                            { description: 'Francia', question: questions[22], is_correct: false },
                            { description: 'Estados Unidos', question: questions[22], is_correct: false },
                            { description: 'Alemania', question: questions[22], is_correct: false },
@@ -184,4 +182,3 @@ answers = Answer.create!([
                            { description: 'El tren', question: questions[29], is_correct: true },
                            { description: 'El barco de vapor', question: questions[29], is_correct: false }
                          ])
-
