@@ -58,14 +58,30 @@
 <body>
 
 <div class="container">
-  <h1>Choose An Event</h1>
-  <form action="/select_event" method="post">
+<h1>Choose An Event</h1>
+  <form action="/events" method="post">
+    <input type="hidden" name="event" value="5">
+    <input type="submit" class="button" value="First World War">
+  </form>
+  <form action="/events" method="post">
     <input type="hidden" name="event" value="0">
     <input type="submit" class="button" value="Second World War">
   </form>
-  <form action="/select_event" method="post">
+  <form action="/events" method="post">
     <input type="hidden" name="event" value="1">
     <input type="submit" class="button" value="Industrial Revolution">
+  </form>
+  <form action="/events" method="post">
+    <input type="hidden" name="event" value="2">
+    <input type="submit" class="button" value="French Revolution">
+  </form>
+  <form action="/events" method="post">
+    <input type="hidden" name="event" value="3">
+    <input type="submit" class="button" value="11/9 Terrorist Attack">
+  </form>
+  <form action="/events" method="post">
+    <input type="hidden" name="event" value="4">
+    <input type="submit" class="button" value="Apollo 11">
   </form>
   <a href="/menu" class="button">Back</a>
 </div>

@@ -108,7 +108,7 @@
     const countdownTimer = setInterval(() => {
         if (timeLeft <= 0) {
             clearInterval(countdownTimer);
-            window.location.href = 'http://127.0.0.1:4567/menu';
+            window.location.href = 'http://127.0.0.1:4567/finish';
         } else {
             countdownElement.textContent = timeLeft;
             timeLeft--;
