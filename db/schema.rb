@@ -22,7 +22,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_17_205123) do
 
   create_table "questions", force: :cascade do |t|
     t.string "description"
-    t.integer "difficulty"
+    t.integer "event"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
