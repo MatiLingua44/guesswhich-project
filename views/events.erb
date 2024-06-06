@@ -59,9 +59,15 @@
 
 <div class="container">
   <h1>Choose An Event</h1>
-  <a href="/second-world-war" class="button">Second World War</a>
-  <a href="/industrial-revolution" class="button">Industrial Revolution</a>
-  <a href="/menu" class="button">Back To Menu</a>
+  <form action="/select_event" method="post">
+    <input type="hidden" name="event" value="0">
+    <input type="submit" class="button" value="Second World War">
+  </form>
+  <form action="/select_event" method="post">
+    <input type="hidden" name="event" value="1">
+    <input type="submit" class="button" value="Industrial Revolution">
+  </form>
+  <a href="/menu" class="button">Back</a>
 </div>
 
 </body>
