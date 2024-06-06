@@ -48,21 +48,30 @@ class App < Sinatra::Application
 
     get '/learn-event' do
         selected_event = session[:selected_event]
-        if selected_event == 0
-            @learnPdf = "util/industrial-revolution.pdf"
-        elsif selected_event == 1
-            @learnPdf = "util/industrial-revolution.pdf"
+        puts selected_event
+        if selected_event == '0'
+            @event = "util/second-world-war.pdf"
+        elsif selected_event == '1'
+            @event = "util/industrial-revolution.pdf"
+        elsif selected_event == '2'
+            @event = "util/french-revolution.pdf"
+        elsif selected_event == '3'
+            @event = "util/11-9-terrorist-attack.pdf"
+        elsif selected_event == '4'
+            @event = "util/apollo11.pdf"
+        elsif selected_event == '5'
+            @event = "util/first-world-war.pdf"
         end
 
         erb :'learn-event'
     end
 
-    get '/learn-industrial' do
-        erb :'learn-industrial'
+    get '/events' do
+        erb :events
     end
 
-    get '/gamemodes' do
-        erb :gamemodes
+    get '/finish' do
+        erb :finish
     end
 
     # Manages the login request
@@ -111,19 +120,26 @@ class App < Sinatra::Application
     
     processed_questions = []
 
-    post '/select_event' do
+    post '/events' do
         event = params[:event]
         session[:selected_event] = event
 
         if event == '0'
             @eventTitle = "Second World War"
-            erb :'show-event'
         elsif event == '1'
             @eventTitle = "Industrial Revolution"
-            erb :'show-event'
+        elsif event == '2'
+            @eventTitle = "French Revolution"
+        elsif event == '3'
+            @eventTitle = "11/9 Terrorist Attack"
+        elsif event == '4'
+            @eventTitle = "Apollo 11"
+        elsif event == '5'
+            @eventTitle = "First World War"
         else
             redirect '/menu'
         end
+        erb :'show-event'
     end
 
     get '/questions' do
@@ -133,6 +149,14 @@ class App < Sinatra::Application
             @questions = Question.where(event: 0).order("RANDOM()").first
         elsif selected_event == '1'
             @questions = Question.where(event: 1).order("RANDOM()").first
+        elsif selected_event == '2'
+            @questions = Question.where(event: 2).order("RANDOM()").first
+        elsif selected_event == '3'
+            @questions = Question.where(event: 3).order("RANDOM()").first
+        elsif selected_event == '4'
+            @questions = Question.where(event: 4).order("RANDOM()").first
+        elsif selected_event == '5'
+            @questions = Question.where(event: 5).order("RANDOM()").first
         else
             @questions = Question.none
         end
