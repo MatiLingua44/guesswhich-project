@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Main Menu | Guesswhich!</title>
+  <title>Error | Guesswhich!</title>
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
   <style>
       body {
@@ -33,15 +33,15 @@
       }
 
       h1 {
-          font-family: 'Marcellus', serif;
           margin-top: 0;
           color: #5a3e36;
+          font-family: 'Marcellus', serif;
       }
 
       .button {
           display: block;
           width: 200px;
-          margin: 10px auto;
+          margin: 20px auto;
           padding: 12px 20px;
           font-size: 18px;
           background-color: #a25f4b;
@@ -69,10 +69,8 @@
 <body>
 
 <div class="container">
-  <h1>Main Menu</h1>
-  <a href="/events" class="button">Play</a>
-  <a href="/ranking" class="button">Ranking</a>
-  <a href="/" class="button">Exit</a>
+  <h1><%= @error %></h1>
+  <a href=<%= @redirect %> class="button">Back</a>
 </div>
 
 </body>

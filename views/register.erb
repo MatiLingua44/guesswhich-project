@@ -1,80 +1,106 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | Guesswhich!</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-image: url('https://wallpapercave.com/wp/wp9440197.jpg');
-            background-size: cover; /* Asegura que la imagen cubra todo el fondo */
-            background-repeat: no-repeat; /* Evita que la imagen se repita */
-            background-position: center; /* Centra la imagen en el contenedor */
-            background-attachment: fixed;
-            margin: 0;
-            padding: 0;
-            background-color: #f3f3f3;
-        }
-        .container {
-            max-width: 400px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        form {
-            text-align: center;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            color: #666;
-        }
-        input[type="text"],
-        input[type="password"],
-        input[type="email"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-        input[type="submit"] {
-            background-color: #76b1bd;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        input[type="submit"]:hover {
-            background-color: rgba(118, 177, 189, 0.5);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | Guesswhich!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+      body {
+          font-family: 'Raleway', sans-serif;
+          background-image: url('https://c.wallhere.com/photos/df/65/Tibia_PC_gaming_RPG_creature_drawing_women_druids-120582.jpg!d');
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-attachment: fixed;
+          margin: 0;
+          padding: 0;
+          color: #5a3e36;
+      }
+      .container {
+          max-width: 400px;
+          margin: 50px auto;
+          padding: 30px;
+          background-color: #fdf5e6;
+          border-radius: 10px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+          border: 1px solid #d4a373;
+          background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+      }
+      h2 {
+          font-family: 'Marcellus', serif;
+          text-align: center;
+          color: #5a3e36;
+          margin-bottom: 20px;
+      }
+      form {
+          text-align: center;
+      }
+      label {
+          display: block;
+          margin-bottom: 10px;
+          color: #5a3e36;
+          font-weight: bold;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="email"] {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #d4a373;
+          border-radius: 5px;
+          box-sizing: border-box;
+          background-color: #fff8e1;
+      }
+      input[type="submit"] {
+          background-color: #a25f4b;
+          color: white;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 50px;
+          cursor: pointer;
+          transition: background-color 0.3s, transform 0.3s;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      input[type="submit"]:hover {
+          background-color: #d4a373;
+          color: #5a3e36;
+          transform: scale(1.05);
+      }
+      input[type="submit"]:active {
+          transform: scale(0.98);
+      }
+      p {
+          color: #5a3e36;
+      }
+      a {
+          color: #a25f4b;
+          text-decoration: none;
+          font-weight: 700;
+      }
+      a:hover {
+          text-decoration: underline;
+      }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Sign Up</h2>
-        <form action="/register" method="post">
-            <label for="names">Names:</label>
-            <input type="text" id="names" name="names" required><br><br>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br><br>
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required><br><br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br><br>
-            <input type="submit" value="Sign Up">
-             <p><a href="/login">Login</a> now if you're already signed up!</p>
-        </form>
-    </div>
+<div class="container">
+  <h2>Sign Up</h2>
+  <form action="/register" method="post">
+    <label for="names">Names:</label>
+    <input type="text" id="names" name="names" required><br><br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required><br><br>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br><br>
+    <label for="confirm_password">Confirm Password:</label>
+    <input type="password" id="confirm_password" name="confirm_password" required><br><br>
+    <input type="submit" value="Sign Up">
+    <p><a href="/login">Login</a> now if you're already signed up!</p>
+  </form>
+</div>
 </body>
 </html>

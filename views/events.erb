@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Choose an Event | Guesswhich!</title>
+  <title>Choose An Event | Guesswhich!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
   <style>
       body {
-          font-family: Arial, sans-serif;
-          background-image: url('https://wallpapercave.com/wp/wp9440197.jpg');
+          font-family: 'Raleway', sans-serif;
+          background-image: url('https://c.wallhere.com/photos/df/65/Tibia_PC_gaming_RPG_creature_drawing_women_druids-120582.jpg!d');
           background-size: cover;
           background-repeat: no-repeat;
           background-position: center;
           background-attachment: fixed;
-          color: #ffffff;
+          color: #5a3e36;
           margin: 0;
           padding: 0;
           display: flex;
@@ -23,42 +24,74 @@
 
       .container {
           text-align: center;
-          padding: 20px;
-          background-color: #ffffff;
+          padding: 30px;
+          background-color: #fdf5e6;
           border-radius: 10px;
-          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+          border: 1px solid #d4a373;
+          background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
       }
 
       h1 {
+          font-family: 'Marcellus', serif;
           margin-top: 0;
-          color: #333;
+          color: #5a3e36;
       }
 
       .button {
           display: block;
           width: 200px;
           margin: 10px auto;
-          padding: 10px 20px;
+          padding: 12px 20px;
           font-size: 18px;
-          background-color: #76b1bd;
+          background-color: #a25f4b;
           color: #fff;
           text-align: center;
           text-decoration: none;
           border: none;
-          border-radius: 5px;
+          border-radius: 50px;
           cursor: pointer;
-          transition: background-color 0.3s ease;
+          transition: background-color 0.3s ease, transform 0.3s;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .backbutton {
+          display: block;
+          width: 100px;
+          margin: 10px auto;
+          padding: 12px 20px;
+          font-size: 18px;
+          background-color: #555555;
+          color: #fff;
+          text-align: center;
+          text-decoration: none;
+          border: none;
+          border-radius: 50px;
+          cursor: pointer;
+          transition: background-color 0.3s ease, transform 0.3s;
       }
 
       .button:hover {
-          background-color: rgba(118, 177, 189, 0.5);
+          background-color: #d4a373;
+          color: #5a3e36;
+          transform: scale(1.05);
+      }
+
+      .backbutton:hover {
+          background-color: #797673;
+          color: #ece9e9;
+          transform: scale(1.05);
+      }
+
+      .button:active {
+          transform: scale(0.98);
       }
   </style>
 </head>
 <body>
 
 <div class="container">
-<h1>Choose An Event</h1>
+  <h1>Choose An Event</h1>
   <form action="/events" method="post">
     <input type="hidden" name="event" value="5">
     <input type="submit" class="button" value="First World War">
@@ -83,8 +116,9 @@
     <input type="hidden" name="event" value="4">
     <input type="submit" class="button" value="Apollo 11">
   </form>
-  <a href="/menu" class="button">Back</a>
+  <a href="/menu"  class="backbutton">Back</a>
 </div>
 
 </body>
 </html>
+
