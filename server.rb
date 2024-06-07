@@ -32,7 +32,7 @@ class App < Sinatra::Application
     end
 
     get '/ranking' do
-        @users = User.all
+        @users = User.all.order('score DESC')
         erb :'/ranking'
     end
 
@@ -44,6 +44,12 @@ class App < Sinatra::Application
     # Shows the sign in page
     get '/register' do
         erb :register
+    end
+
+    get '/failed' do
+        @error = session[:error]
+        @redirect = session[:redirect]
+        erb :failed
     end
 
     get '/learn-event' do
@@ -58,7 +64,7 @@ class App < Sinatra::Application
         elsif selected_event == '3'
             @event = "util/11-9-terrorist-attack.pdf"
         elsif selected_event == '4'
-            @event = "util/apollo11.pdf"
+            @event = "util/apollo-11.pdf"
         elsif selected_event == '5'
             @event = "util/first-world-war.pdf"
         end
@@ -71,6 +77,7 @@ class App < Sinatra::Application
     end
 
     get '/finish' do
+        @title = session[:title]
         erb :finish
     end
 
@@ -86,7 +93,9 @@ class App < Sinatra::Application
             puts session
             redirect '/menu'
         else
-            redirect '/login'
+            session[:error] = "Invalid credentials"
+            session[:redirect] = "/login"
+            redirect '/failed'
         end
     end
 
@@ -94,24 +103,33 @@ class App < Sinatra::Application
     post '/register' do
         username = params[:username]
         password = params[:password]
+        confirm_password = params[:confirm_password]
         email = params[:email]
         names = params[:names]
+
+        session[:redirect] = "/register"
 
         # Verify if the username already exists
         existing_user = User.find_by(username:username)
         if existing_user
-            return "The username is already being used. Please insert a diferent one."
+            session[:error] = "The username is already being used. Please use a different one"
+            redirect '/failed'
         end
 
         existing_email = User.find_by(email:email)
         if existing_email
-            return "The email is being used by another pearson. Please choose a new one."
+            session[:error] = "The email is already being used. Please use a different one"
+            redirect '/failed'
+        end
+
+        if  password != confirm_password
+            session[:error] = "Passwords do not match"
+            redirect '/failed'
         end
 
         # Insert the new user into the database
         User.create(names: names, username: username, email: email, password: password)
-      
-      
+
         # Redirect to homepage after succesfully sign up
         redirect '/login'
     end
@@ -162,8 +180,10 @@ class App < Sinatra::Application
         end
 
         if @questions.nil?
+            session[:title] = "You answered all the questions."
             redirect '/finish'
         else
+            session[:title] = "You ran out of time!"
             processed_questions << @questions.description
             @answers = @questions.answers.all
             erb :'questions/show'
@@ -174,27 +194,34 @@ class App < Sinatra::Application
         if session[:username]
             user = User.find_by(username: session[:username])
             existing_answer = Answer.find_by(id: params["answer"])
+
             if existing_answer&.is_correct
                 session[:question_count] ||= 0
                 session[:question_count] += 1
                 session[:user_score] ||= 0
-                session[:user_score] += 1
+                session[:user_score] += 10
+                @score = session[:user_score]
+
                 if user.score < session[:user_score]
                     user.update(score: session[:user_score])
                 end
+
+                if session[:question_count] == 15
+                    session[:title] = "Congratulations, You won!"
+                    redirect '/finish'
+                end
                 redirect '/questions'
-            else
+            elsif !existing_answer.is_correct
                 session[:question_count] = 0
                 session[:user_score] = 0
-                redirect '/menu'
+                session[:title] = "Your answer is not correct, you lost!"
+                redirect '/finish'
             end
-        else
-            redirect '/login'
         end
     end
 
     before do
-        public_paths = ['/login', '/register', '/']
+        public_paths = ['/login', '/register', '/', '/failed']
         pass if public_paths.include?(request.path_info)
         redirect '/login' unless session[:username]
     end
