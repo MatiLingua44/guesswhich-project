@@ -163,21 +163,9 @@ class App < Sinatra::Application
     get '/questions' do
         selected_event = session[:selected_event]
 
-        if selected_event == '0'
-            @questions = Question.where(event: 0).order("RANDOM()").first
-        elsif selected_event == '1'
-            @questions = Question.where(event: 1).order("RANDOM()").first
-        elsif selected_event == '2'
-            @questions = Question.where(event: 2).order("RANDOM()").first
-        elsif selected_event == '3'
-            @questions = Question.where(event: 3).order("RANDOM()").first
-        elsif selected_event == '4'
-            @questions = Question.where(event: 4).order("RANDOM()").first
-        elsif selected_event == '5'
-            @questions = Question.where(event: 5).order("RANDOM()").first
-        else
-            @questions = Question.none
-        end
+        @questions = Question.where(event: selected_event.to_i)
+                             .where.not(description: processed_questions)
+                             .order("RANDOM()").first
 
         if @questions.nil?
             session[:title] = "You answered all the questions."
