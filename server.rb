@@ -202,6 +202,10 @@ class App < Sinatra::Application
             elsif !existing_answer.is_correct
                 session[:question_count] = 0
                 session[:user_score] = 0
+                user.update(score: user.score - 5)
+                if user.score < 0
+                    user.update(score: 0)
+                end
                 session[:title] = "Your answer is not correct, you lost!"
                 redirect '/finish'
             end
