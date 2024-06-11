@@ -164,17 +164,17 @@ class App < Sinatra::Application
         selected_event = session[:selected_event]
 
         if selected_event == '0'
-            @questions = Question.where(event: 0).order("RANDOM()").first
+            @questions = Question.where.not(description: processed_questions).where(event: 0).order("RANDOM()").first
         elsif selected_event == '1'
-            @questions = Question.where(event: 1).order("RANDOM()").first
+            @questions = Question.where.not(description: processed_questions).where(event: 1).order("RANDOM()").first
         elsif selected_event == '2'
-            @questions = Question.where(event: 2).order("RANDOM()").first
+            @questions = Question.where.not(description: processed_questions).where(event: 2).order("RANDOM()").first
         elsif selected_event == '3'
-            @questions = Question.where(event: 3).order("RANDOM()").first
+            @questions = Question.where.not(description: processed_questions).where(event: 3).order("RANDOM()").first
         elsif selected_event == '4'
-            @questions = Question.where(event: 4).order("RANDOM()").first
+            @questions = Question.where.not(description: processed_questions).where(event: 4).order("RANDOM()").first
         elsif selected_event == '5'
-            @questions = Question.where(event: 5).order("RANDOM()").first
+            @questions = Question.where.not(description: processed_questions).where(event: 5).order("RANDOM()").first
         else
             @questions = Question.none
         end
@@ -214,6 +214,10 @@ class App < Sinatra::Application
             elsif !existing_answer.is_correct
                 session[:question_count] = 0
                 session[:user_score] = 0
+                user.update(score: user.score - 5)
+                if user.score < 0
+                    user.update(score: 0)
+                end
                 session[:title] = "Your answer is not correct, you lost!"
                 redirect '/finish'
             end
