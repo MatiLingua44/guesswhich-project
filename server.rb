@@ -54,21 +54,15 @@ class App < Sinatra::Application
 
     get '/learn-event' do
         selected_event = session[:selected_event]
-        puts selected_event
-        if selected_event == '0'
-            @event = "util/second-world-war.pdf"
-        elsif selected_event == '1'
-            @event = "util/industrial-revolution.pdf"
-        elsif selected_event == '2'
-            @event = "util/french-revolution.pdf"
-        elsif selected_event == '3'
-            @event = "util/11-9-terrorist-attack.pdf"
-        elsif selected_event == '4'
-            @event = "util/apollo-11.pdf"
-        elsif selected_event == '5'
-            @event = "util/first-world-war.pdf"
-        end
-
+        event_learn = {
+          '0' => "util/second-world-war.pdf",
+          '1' => "util/industrial-revolution.pdf",
+          '2' => "util/french-revolution.pdf",
+          '3' => "util/11-9-terrorist-attack.pdf",
+          '4' => "util/apollo-11.pdf",
+          '5' => "util/first-world-war.pdf"
+        }
+        @event = event_learn[selected_event]
         erb :'learn-event'
     end
 
@@ -142,21 +136,15 @@ class App < Sinatra::Application
         event = params[:event]
         session[:selected_event] = event
 
-        if event == '0'
-            @eventTitle = "Second World War"
-        elsif event == '1'
-            @eventTitle = "Industrial Revolution"
-        elsif event == '2'
-            @eventTitle = "French Revolution"
-        elsif event == '3'
-            @eventTitle = "11/9 Terrorist Attack"
-        elsif event == '4'
-            @eventTitle = "Apollo 11"
-        elsif event == '5'
-            @eventTitle = "First World War"
-        else
-            redirect '/menu'
-        end
+        event_titles = {
+          '0' => "Second World War",
+          '1' => "Industrial Revolution",
+          '2' => "French Revolution",
+          '3' => "11/9 Terrorist Attack",
+          '4' => "Apollo 11",
+          '5' => "First World War"
+        }
+        @eventTitle = event_titles[event]
         erb :'show-event'
     end
 
