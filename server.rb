@@ -22,6 +22,8 @@ class App < Sinatra::Application
         enable :sessions
     end
 
+    processed_questions = []
+
     get '/' do
         session.clear
         erb :home
@@ -71,6 +73,7 @@ class App < Sinatra::Application
     end
 
     get '/finish' do
+        processed_questions.clear
         @title = session[:title]
         erb :finish
     end
@@ -130,7 +133,6 @@ class App < Sinatra::Application
 
     #Game modes implementation
     
-    processed_questions = []
 
     post '/events' do
         event = params[:event]
