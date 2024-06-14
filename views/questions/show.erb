@@ -118,11 +118,47 @@
               opacity: 1;
           }
       }
+
+#points-container {
+    border: 6px solid #ccc;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #f0f0f0;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 80px;
+    position: absolute;
+    top: 50px;
+    left: 50px;
+
+    overflow: hidden;
+  }
+
+  .point-item {
+    margin-left: auto;
+    animation: fadeIn 1s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
   </style>
 </head>
 <body>
 <div class="container">
   <div id="countdown">10</div>
+  <div id="points-container">
+  <div class="point-item">Puntos: <%= @score %></div>
+</div>
+
   <h1><%= @questions.description %></h1>
   <p>Selecciona una respuesta:</p>
 
