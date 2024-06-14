@@ -152,7 +152,7 @@ class App < Sinatra::Application
 
     get '/questions' do
         selected_event = session[:selected_event]
-
+        @score = session[:user_score] ||= 0
         @questions = Question.where(event: selected_event.to_i)
                              .where.not(description: processed_questions)
                              .order("RANDOM()").first
@@ -196,6 +196,7 @@ class App < Sinatra::Application
                 if user.score < 0
                     user.update(score: 0)
                 end
+                @score = session[:user_score]
                 session[:title] = "Your answer is not correct, you lost!"
                 redirect '/finish'
             end
