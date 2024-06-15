@@ -137,7 +137,7 @@ class App < Sinatra::Application
     post '/events' do
         event = params[:event]
         session[:selected_event] = event
-
+        session[:user_score] = 0
         event_titles = {
           '0' => "Second World War",
           '1' => "Industrial Revolution",
