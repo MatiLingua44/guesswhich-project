@@ -6,7 +6,7 @@
   <title>Learn | Guesswhich!</title>
   <style>
       body {
-          font-family: Arial, sans-serif;
+          font-family: 'Raleway', sans-serif;
           background-image: url('https://c.wallhere.com/photos/df/65/Tibia_PC_gaming_RPG_creature_drawing_women_druids-120582.jpg!d');
           background-size: cover;
           background-repeat: no-repeat;
@@ -69,8 +69,13 @@
   <iframe src="<%= @event %>"></iframe>
 </div>
 <div class="container">
-  <a href="/menu" class="button">Back</a>
+  <button id="backButton" class="button">Back</button>
 </div>
 
+<script>
+    document.getElementById('backButton').addEventListener('click', function() {
+        history.back();
+    });
+</script>
 </body>
 </html>
