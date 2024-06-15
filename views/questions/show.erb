@@ -36,6 +36,7 @@
           align-items: center;
           border: 1px solid #d4a373;
           background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+          position: relative;
       }
 
       h1 {
@@ -119,48 +120,46 @@
           }
       }
 
-#points-container {
-    border: 6px solid #ccc;
-    padding: 10px;
-    margin-top: 20px;
-    background-color: #f0f0f0;
+      #points-container {
+          border: 2px solid #d4a373;
+          padding: 10px;
+          background-color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 120px;
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          font-size: 1.2em;
+          font-weight: bold;
+      }
 
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    width: 80px;
-    position: absolute;
-    top: 50px;
-    left: 50px;
+      .point-item {
+          animation: fadeIn 1s ease-out forwards;
+      }
 
-    overflow: hidden;
-  }
-
-  .point-item {
-    margin-left: auto;
-    animation: fadeIn 1s ease-out forwards;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
+      @keyframes fadeIn {
+          from {
+              opacity: 0;
+          }
+          to {
+              opacity: 1;
+          }
+      }
   </style>
 </head>
 <body>
 <div class="container">
-  <div id="countdown">10</div>
+  <div id="countdown">15</div>
   <div id="points-container">
-  <div class="point-item">Puntos: <%= @score %></div>
-</div>
+    <div class="point-item">Points: <%= @score %></div>
+  </div>
 
   <h1><%= @questions.description %></h1>
-  <p>Selecciona una respuesta:</p>
+  <p>Choose an answer:</p>
 
   <% @answers.shuffle.each do |answer| %>
     <form action="/questions" method="post">
@@ -168,11 +167,11 @@
       <button type="submit" id="answer"><%= answer.description %></button>
     </form>
   <% end %>
-  <a href="/menu"  class="backbutton">Back</a>
+  <a href="/menu" class="backbutton">Back</a>
 </div>
 
 <script>
-    let timeLeft = 10;
+    let timeLeft = 15;
     const countdownElement = document.getElementById('countdown');
 
     const countdownTimer = setInterval(() => {
