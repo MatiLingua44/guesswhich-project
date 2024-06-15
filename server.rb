@@ -34,6 +34,7 @@ class App < Sinatra::Application
         erb :menu
     end
 
+    # Shows the ranking
     get '/ranking' do
         @users = User.all.order('score DESC')
         erb :'/ranking'
@@ -49,14 +50,15 @@ class App < Sinatra::Application
         erb :register
     end
 
+    # Show the failed page when the player looses
     get '/failed' do
         @error = session[:error]
         @redirect = session[:redirect]
         erb :failed
     end
 
+    # Shows the information about the selected event
     get '/learn-event' do
-        @username = session[:username]
         selected_event = session[:selected_event]
         event_learn = {
           '0' => "util/second-world-war.pdf",
@@ -70,10 +72,12 @@ class App < Sinatra::Application
         erb :'learn-event'
     end
 
+    # Manages the events
     get '/events' do
         erb :events
     end
 
+    # Route used when the game finishes
     get '/finish' do
         processed_questions.clear
         @title = session[:title]
@@ -133,9 +137,7 @@ class App < Sinatra::Application
         redirect '/login'
     end
 
-    #Game modes implementation
-    
-
+    # Shows all the events available for playing
     post '/events' do
         event = params[:event]
         session[:selected_event] = event
@@ -154,6 +156,7 @@ class App < Sinatra::Application
         erb :'show-event'
     end
 
+    # Shows the questions with their answers
     get '/questions' do
         selected_event = session[:selected_event]
         @score = session[:user_score] ||= 0
@@ -207,6 +210,7 @@ class App < Sinatra::Application
         end
     end
 
+    # Restricts paths not allowed to get if not logged in
     before do
         public_paths = ['/login', '/register', '/', '/failed']
         pass if public_paths.include?(request.path_info)
