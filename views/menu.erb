@@ -64,9 +64,22 @@
       .button:active {
           transform: scale(0.98);
       }
+
+      .username {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 16px;
+          color: #fff;
+          background-color: rgba(0, 0, 0, 0.6);
+          padding: 5px 10px;
+          border-radius: 5px;
+      }
   </style>
 </head>
 <body>
+
+<div class="username">User: <%= @username %></div>
 
 <div class="container">
   <h1>Main Menu</h1>

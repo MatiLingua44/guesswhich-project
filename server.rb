@@ -30,6 +30,7 @@ class App < Sinatra::Application
     end
 
     get '/menu' do
+        @username = session[:username]
         erb :menu
     end
 
@@ -55,6 +56,7 @@ class App < Sinatra::Application
     end
 
     get '/learn-event' do
+        @username = session[:username]
         selected_event = session[:selected_event]
         event_learn = {
           '0' => "util/second-world-war.pdf",
