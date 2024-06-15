@@ -29,6 +29,8 @@ RSpec.describe 'Server' do
     get '/login'
     expect(last_response).to be_ok
     expect(last_response.body).to include('<form')
+    expect(last_response.body).to include('name="username"')
+    expect(last_response.body).to include('name="password"')
   end
 
   it 'logs in with valid credentials' do
@@ -36,13 +38,15 @@ RSpec.describe 'Server' do
     expect(last_response.status).to eq(302)
     follow_redirect!
     expect(last_request.path).to eq('/menu')
+    expect(last_response.body).to include('User: testuser')
   end
 
   it 'fails to log in with invalid credentials' do
     post '/login', username: 'testuser', password: 'wrongpassword'
     expect(last_response.status).to eq(302)
     follow_redirect!
-    expect(last_request.path).to eq('/login')
+    expect(last_request.path).to eq('/failed')
+    expect(last_response.body).to include('Invalid credentials')
   end
 
   it 'redirects to login page if accessing a protected route without logging in' do
@@ -52,22 +56,37 @@ RSpec.describe 'Server' do
     expect(last_request.path).to eq('/login')
   end
 
-  it 'shows register form' do
+  it 'shows the register form' do
     get '/register'
     expect(last_response).to be_ok
     expect(last_response.body).to include('<form')
+    expect(last_response.body).to include('name="username"')
+    expect(last_response.body).to include('name="password"')
+    expect(last_response.body).to include('name="confirm_password"')
+    expect(last_response.body).to include('name="email"')
+    expect(last_response.body).to include('name="names"')
   end
 
-  it 'sign up with used credentials' do
-    post '/register', username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com', names: 'Test User'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/register')
+  it 'signs up with used credentials' do
+    post '/register', username: 'testuser', password: 'testuserpassword', confirm_password: 'testuserpassword', email: 'testuser@example.com', names: 'Test User'
+    expect(last_response.status).to eq(302)
+    follow_redirect!
+    expect(last_request.path).to eq('/failed')
+    expect(last_response.body).to include('The username is already being used. Please use a different one')
   end
 
-  it 'sign up with available credentials' do
-    post '/register', username: 'testuserOk', password: 'testuserpasswordOk', email: 'testuserOk@example.com', names: 'Test User'
+  it 'signs up with available credentials' do
+    post '/register', username: 'testuserOk', password: 'testuserpasswordOk', confirm_password: 'testuserpasswordOk', email: 'testuserOk@example.com', names: 'Test User'
     expect(last_response.status).to eq(302)
     follow_redirect!
     expect(last_request.path).to eq('/login')
+  end
+
+  it 'signs up with mismatched passwords' do
+    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2', email: 'testuserNew@example.com', names: 'Test User New'
+    expect(last_response.status).to eq(302)
+    follow_redirect!
+    expect(last_request.path).to eq('/failed')
+    expect(last_response.body).to include('Passwords do not match')
   end
 end
