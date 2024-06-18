@@ -1,16 +1,14 @@
-# server.rb
-
 require 'sinatra/base'
 require 'sinatra/activerecord'
 require 'sqlite3'
-require 'json'
+require 'securerandom'
+require 'mail'
 
 require './models/user'
 require './models/question'
 require './models/answer'
 
 class App < Sinatra::Application
-
     set :database_file, './config/database.yml'
     set :public_folder, 'public'
 
@@ -89,11 +87,10 @@ class App < Sinatra::Application
         username = params[:username]
         password = params[:password]
 
-        existing_user = User.find_by(username:username)
+        existing_user = User.find_by(username: username)
 
-        if existing_user && existing_user['password'] == password
+        if existing_user && existing_user.authenticate(password)
             session[:username] = params[:username]
-            puts session
             redirect '/menu'
         else
             session[:error] = "Invalid credentials"
@@ -112,20 +109,19 @@ class App < Sinatra::Application
 
         session[:redirect] = "/register"
 
-        # Verify if the username already exists
-        existing_user = User.find_by(username:username)
+        existing_user = User.find_by(username: username)
         if existing_user
             session[:error] = "The username is already being used. Please use a different one"
             redirect '/failed'
         end
 
-        existing_email = User.find_by(email:email)
+        existing_email = User.find_by(email: email)
         if existing_email
             session[:error] = "The email is already being used. Please use a different one"
             redirect '/failed'
         end
 
-        if  password != confirm_password
+        if password != confirm_password
             session[:error] = "Passwords do not match"
             redirect '/failed'
         end
@@ -210,11 +206,86 @@ class App < Sinatra::Application
         end
     end
 
-    # Restricts paths not allowed to get if not logged in
-    before do
-        public_paths = ['/login', '/register', '/', '/failed']
-        pass if public_paths.include?(request.path_info)
-        redirect '/login' unless session[:username]
+    Mail.defaults do
+        delivery_method :smtp, {
+          address: 'smtp.gmail.com',
+          port: 587,
+          user_name: 'guesswhichh@gmail.com',
+          password: 'djzy qznf ixjg yfrn',
+          authentication: 'plain',
+          enable_starttls_auto: true
+        }
     end
 
+    post '/password_resets' do
+        user = User.find_by(email: params[:email])
+        if user
+            user.generate_password_reset_token!
+            mail = Mail.new do
+                from    'guesswhichh@gmail.com'
+                to      user.email
+                subject 'Password Reset'
+                body    "To reset your password, click the link below:\n\n" +
+                          "http://localhost:4567/password_resets/#{user.password_reset_token}/edit"
+            end
+
+            mail.deliver!
+            session[:notice] = "A password reset email has been sent to your email address"
+            redirect '/password_resets/notice'
+        else
+            session[:notice] = "This email address is not registered"
+            redirect '/password_resets/notice'
+        end
+    end
+
+    get '/password_resets/:token/edit' do
+        @user = User.find_by(password_reset_token: params[:token])
+        if @user && @user.password_reset_sent_at > 2.hours.ago
+            erb :'password_resets/edit'
+        else
+            session[:notice] = "The token has expired, please try again"
+            redirect '/password_resets/notice'
+        end
+    end
+
+    get '/password_resets/new' do
+        erb :'password_resets/new'
+    end
+
+    get '/password_resets/notice' do
+        @notice = session[:notice]
+        erb :'password_resets/notice'
+    end
+
+    patch '/password_resets/:token' do
+        token = params[:token]
+
+        @user = User.find_by(password_reset_token: token)
+
+        if @user && @user.password_reset_sent_at > 2.hours.ago
+            if @user.update(password: params[:password])
+                @user.update(password_reset_token: nil, password_reset_sent_at: nil)
+                session[:notice] = "The password has been reset"
+                redirect '/password_resets/notice'
+            end
+        else
+            session[:notice] = "This email address is not registered"
+            redirect '/password_resets/notice'
+        end
+    end
+
+    before do
+        public_paths = %w[/login /register / /failed /password_resets/new /password_resets /password_resets/notice]
+
+        public_path_patterns = [
+          %r{^/password_resets/\w{22}/edit$},
+          %r{^/password_resets/\w{22}$}
+        ]
+
+        if public_paths.include?(request.path_info) || public_path_patterns.any? { |pattern| request.path_info.match(pattern) }
+            pass
+        else
+            redirect '/login' unless session[:username]
+        end
+    end
 end
