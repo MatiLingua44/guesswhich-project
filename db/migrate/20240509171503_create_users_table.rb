@@ -6,6 +6,7 @@ class CreateUsersTable < ActiveRecord::Migration[7.1]
       t.string :email
       t.string :password
       t.integer :score
+      t.string :password_digest
 
       t.datetime :created_at
       t.datetime :updated_at
