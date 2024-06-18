@@ -15,5 +15,6 @@ gem 'sqlite3', '~> 1.4'
 gem 'rake'
 gem 'rspec'
 gem 'rack-test'
-gem 'json'
+gem 'mail'
+gem 'bcrypt'
 
