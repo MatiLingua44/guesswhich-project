@@ -265,7 +265,7 @@ class App < Sinatra::Application
         if @user && @user.password_reset_sent_at > 2.hours.ago
             if @user.update(password: params[:password])
                 @user.update(password_reset_token: nil, password_reset_sent_at: nil)
-                session[:notice] = "The password has been reset"
+                session[:notice] = "The password has been successfully reset"
                 redirect '/password_resets/notice'
             end
         else
@@ -274,6 +274,24 @@ class App < Sinatra::Application
         end
     end
 
+    # Shows the user information
+    get '/user' do
+        @user = User.find_by(username: session[:username])
+        erb :'users/info'
+    end
+
+    # Route for deleting a user
+    post '/user/delete' do
+        if session[:username]
+            user = User.find_by(username: session[:username])
+            user.destroy
+            session.clear
+            session[:notice] = "The user has been successfully deleted"
+            redirect '/password_resets/notice'
+        end
+    end
+
+    # Restricts paths not allowed to get if not logged in
     before do
         public_paths = %w[/login /register / /failed /password_resets/new /password_resets /password_resets/notice]
 
@@ -288,4 +306,5 @@ class App < Sinatra::Application
             redirect '/login' unless session[:username]
         end
     end
+
 end
