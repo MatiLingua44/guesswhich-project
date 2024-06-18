@@ -29,6 +29,7 @@ RSpec.describe 'Server' do
     get '/login'
     expect(last_response).to be_ok
     expect(last_response.body).to include('<form')
+    expect(last_response.body).to include('Log In')
     expect(last_response.body).to include('name="username"')
     expect(last_response.body).to include('name="password"')
   end
@@ -60,6 +61,7 @@ RSpec.describe 'Server' do
     get '/register'
     expect(last_response).to be_ok
     expect(last_response.body).to include('<form')
+    expect(last_response.body).to include('Sign Up')
     expect(last_response.body).to include('name="username"')
     expect(last_response.body).to include('name="password"')
     expect(last_response.body).to include('name="confirm_password"')
