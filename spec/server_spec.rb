@@ -1,10 +1,12 @@
 ENV['APP_ENV'] = 'test'
 
+require 'simplecov'
+SimpleCov.start
+
 require_relative '../server.rb'
 require_relative '../models/user'
 require 'rspec'
 require 'rack/test'
-
 
 RSpec.describe 'Server' do
   include Rack::Test::Methods

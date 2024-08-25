@@ -1,5 +1,5 @@
 # Gemfile
-ruby '3.0.2'
+ruby '3.3.4'
 
 # frozen_string_literal: true
 
@@ -17,4 +17,6 @@ gem 'rspec'
 gem 'rack-test'
 gem 'mail'
 gem 'bcrypt'
+gem 'simplecov', require: false
+
 
