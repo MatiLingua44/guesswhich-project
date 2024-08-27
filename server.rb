@@ -280,6 +280,21 @@ class App < Sinatra::Application
         erb :'users/info'
     end
 
+    # Shows user edit window
+    get '/edit-profile' do
+        @user = User.find_by(username: session[:username])
+        erb :'users/edit-profile'
+    end
+
+    # Route for score reset
+    post '/user/reset-score' do
+        if session[:username]
+            user = User.find_by(username: session[:username])
+            user.update(score: 0)
+            redirect '/edit-profile'
+        end
+    end
+
     # Route for deleting a user
     post '/user/delete' do
         if session[:username]
