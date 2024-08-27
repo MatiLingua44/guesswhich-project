@@ -101,9 +101,16 @@
     <p><strong>Email:</strong> <%= @user.email %></p>
     <p><strong>Score:</strong> <%= @user.score %></p>
   </div>
-  <a href="/edit-profile" class="button">Edit Profile</a>
-  <a href="/menu" class="button">Back</a>
 
+  <form action="/user/reset-score" method="post">
+    <button type="submit" class="button">Reset Score</button>
+  </form>
+
+  <form action="/user/delete" method="post">
+    <button type="submit" class="button delete-button">Delete User</button>
+  </form>
+
+  <a href="/user" class="button">Back</a>
 </div>
 
 </body>
