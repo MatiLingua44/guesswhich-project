@@ -93,4 +93,12 @@ RSpec.describe 'Server' do
     expect(last_request.path).to eq('/failed')
     expect(last_response.body).to include('Passwords do not match')
   end
+
+  it 'fails to sign up with a used email' do
+    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2', email: 'testuser@example.com', names: 'Test User New'
+    expect(last_response.status).to eq(302)
+    follow_redirect!
+    expect(last_request.path).to eq('/failed')
+    expect(last_response.body).to include('The email is already being used. Please use a different one')
+  end
 end
