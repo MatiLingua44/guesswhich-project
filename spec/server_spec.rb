@@ -27,6 +27,18 @@ RSpec.describe 'Server' do
     )
   end
 
+  it 'redirects to the page of password resets 'do
+    get '/password_resets/new' 
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/password_resets/new')
+  end
+
+  it 'reports that the password change was successful' do
+    get '/password_resets/notice'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/password_resets/notice')
+  end
+
   it 'redirects to the user information when authenticated' do
     post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'}
     follow_redirect!
