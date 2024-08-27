@@ -27,6 +27,47 @@ RSpec.describe 'Server' do
     )
   end
 
+  it 'redirects to the user information when authenticated' do
+    post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'}
+    follow_redirect!
+
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    follow_redirect!
+    get '/users'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/users')
+    expect(last_response.body).to include('testuser')
+    expect(last_response.body).to include('testuser@example.com')
+  end
+
+  it 'redirects to the login page when not authenticated' do 
+    get '/users'
+     expect(last_response.status).to eq(302)
+     expect(last_response.headers['Location']).to include('/login')
+  end
+
+  it 'shows the home page' do
+    get '/' do
+      expect(last_response.status).to eq(200)
+      expect(last_request.path).to eq('/')
+    end
+  end
+
+  it 'redirects to the page event when authenticated'do
+    post '/login' , {username: 'testuser', password: 'testuserpassword'}
+    get '/events'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/events')
+  end
+
+  it 'redirects to the login page when not authenticated' do
+      get '/events' 
+      expect(last_response.status).to eq(302)
+      expect(last_response.headers['Location']).to include('/login')
+  end
+
   it 'shows the login form' do
     get '/login'
     expect(last_response).to be_ok
