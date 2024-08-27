@@ -34,10 +34,9 @@ RSpec.describe 'Server' do
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/menu')
 
-    follow_redirect!
-    get '/users'
+    get '/user'
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/users')
+    expect(last_request.path).to eq('/user')
     expect(last_response.body).to include('testuser')
     expect(last_response.body).to include('testuser@example.com')
   end
