@@ -153,4 +153,52 @@ RSpec.describe 'Server' do
     expect(last_request.path).to eq('/failed')
     expect(last_response.body).to include('The email is already being used. Please use a different one')
   end
+
+
+  it 'shows the ranking when logged in' do
+    post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'}
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/ranking'
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to include('Ranking table')
+  end
+
+  it 'shows the game finished because answered all the questions' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/questions'
+    allow(Question).to receive(:where).and_return([])
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/finish')
+    expect(last_response.body).to include('You answered all the questions')
+  end
+
+  it 'deletes a user' do
+    post'/login', {username: 'testuser', password: 'testuserpassword'}
+    follow_redirect!
+
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/user'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/user')
+    expect(last_response.body).to include('testuser')
+    expect(last_response.body).to include('testuser@example.com')
+
+    post '/user/delete'
+    expect(last_response.status).to eq(302)
+  end
 end
