@@ -236,6 +236,33 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('Delete User')
   end
 
+  it 'resets score user' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+    
+    get '/edit-profile'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/edit-profile')
+
+    post'/user/reset-score', {
+      user_score: 0
+    }
+    expect(last_request.path).to eq('/user/reset-score')
+
+    get '/edit-profile'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/edit-profile')
+    expect(last_response.body).to include('Reset Score')
+  end 
+
+
   it 'increments score and redirects to /questions when answer is correct' do
     post '/login', {
       username: 'testuser',
@@ -320,6 +347,4 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:question_count]).to eq(0)
     expect(last_request.env['rack.session'][:user_score]).to eq(0)
   end
-
-
 end
