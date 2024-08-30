@@ -201,4 +201,125 @@ RSpec.describe 'Server' do
     post '/user/delete'
     expect(last_response.status).to eq(302)
   end
+
+  it 'shows the game finished because ran out of time' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/questions'
+    allow(Question).to receive(:where).and_return([])
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/finish')
+    expect(last_response.body).to include('You answered all the questions')
+  end
+
+  it 'edits a user' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/edit-profile'
+    expect(last_request.path).to eq('/edit-profile')
+    expect(last_response.body).to include('Delete User')
+  end
+
+  it 'increments score and redirects to /questions when answer is correct' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    question = Question.create(description: "Test question", event: 1)
+    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    post '/questions', { answer: correct_answer.id }, 'rack.session' => {
+      question_count: 5,
+      user_score: 50,
+      username: 'testuser'
+    }
+
+    expect(last_response).to be_redirect
+    follow_redirect!
+
+    expect(last_request.path).to eq('/questions')
+    expect(last_request.env['rack.session'][:question_count]).to eq(6)
+    expect(last_request.env['rack.session'][:user_score]).to eq(60)
+  end
+
+  it 'finishes the game when answer is correct and reaches 15 questions' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    question = Question.create(description: "Test question", event: 1)
+    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    session_data = {
+      question_count: 14,
+      user_score: 140,
+      username: 'testuser'
+    }
+
+    post '/questions', { answer: correct_answer.id }, 'rack.session' => session_data
+
+    expect(last_response).to be_redirect
+    follow_redirect!
+    expect(last_request.path).to eq('/finish')
+    expect(last_response.body).to include('Congratulations, You won!')
+
+    expect(last_request.env['rack.session'][:question_count]).to eq(15)
+    expect(last_request.env['rack.session'][:user_score]).to eq(150)
+  end
+
+  it 'resets score and redirects to /finish when answer is incorrect' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    session_data = {
+      question_count: 5,
+      user_score: 50,
+      username: 'testuser'
+    }
+
+    question = Question.create(description: "Test question", event: 1)
+    incorrect_answer = Answer.create(description: "Incorrect answer", is_correct: false, question: question)
+
+    post '/questions', { answer: incorrect_answer.id }, 'rack.session' => session_data
+
+    expect(last_response).to be_redirect
+    follow_redirect!
+    expect(last_request.path).to eq('/finish')
+    expect(last_response.body).to include('Your answer is not correct, you lost!')
+
+    expect(last_request.env['rack.session'][:question_count]).to eq(0)
+    expect(last_request.env['rack.session'][:user_score]).to eq(0)
+  end
+
+
 end
