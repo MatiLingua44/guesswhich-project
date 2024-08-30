@@ -262,6 +262,34 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('Reset Score')
   end 
 
+  it 'Redirect to finish page when user runs out of time' do
+    post '/login',{
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com  '
+    } 
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    question = Question.create(description: "Test question", event: 1)
+    incorrect_answer = Answer.create(description: "Incorrect answer", is_correct: false, question: question)
+
+    session_data = {
+      user_score: 0,
+      question_count: 0,
+      username: 'testuser',
+      user_time: -1,
+      processed_questions: [],
+      selected_event: 1 
+    }
+
+    get '/questions',{}, 'rack.session' => session_data
+
+    get '/finish'
+    expect(last_request.path).to eq('/finish')
+    expect(last_response.body).to include('You ran out of time!')
+  end
 
   it 'increments score and redirects to /questions when answer is correct' do
     post '/login', {
@@ -289,6 +317,7 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:question_count]).to eq(6)
     expect(last_request.env['rack.session'][:user_score]).to eq(60)
   end
+
 
   it 'finishes the game when answer is correct and reaches 15 questions' do
     post '/login', {
