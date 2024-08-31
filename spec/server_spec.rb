@@ -406,4 +406,45 @@ RSpec.describe 'Server' do
     expect(last_request.path).to eq('/learn-event')
     expect(last_response.body).to include('Back')
   end
+
+  it 'password resets with created user' do
+    post '/register', {
+      username: 'testuser2', 
+      password: 'testuserpassword2', 
+      confirm_password: 'testuserpassword2', 
+      email: 'testuser2@example.com',
+      names: 'Test User'
+    }
+    expect(last_response.status).to eq(302)
+    follow_redirect!
+    expect(last_request.path).to eq('/login')
+
+    get '/password_resets/new'
+
+    post '/password_resets', {
+      username: 'testuser2',
+      password: 'testuserpassword2',
+      email: 'testuser2@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/password_resets/notice')
+    expect(last_response.body).to include('A password reset email has been sent to your email address')
+    expect(last_response.body).to include('Back To Login')
+
+  end 
+
+  it 'password resets with non-existent user' do
+    post '/password_resets' ,{
+      username: 'testuser2',
+      password: 'testuserpassword2',
+      email: 'testuser2@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/password_resets/notice')
+    expect(last_response.body).to include('This email address is not registered')
+    expect(last_response.body).to include('Back To Login')
+  end
 end
