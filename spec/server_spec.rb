@@ -376,4 +376,34 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:question_count]).to eq(0)
     expect(last_request.env['rack.session'][:user_score]).to eq(0)
   end
+
+  it 'choose an event and read its material.' do
+    post '/login',
+    {
+      username: 'testuser',
+      password: 'testuserpassword',
+      mail: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    session_data = {
+      username: 'testuser',
+      question_count: 0,
+      user_score: 0,
+      processed_questions: [],
+      selected_event: 1
+    }
+    
+    post'/events',{},'rack.session' => session_data
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to include('Star')
+    expect(last_response.body).to include('Learn')
+    expect(last_response.body).to include('Back')
+
+    get '/learn-event'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/learn-event')
+    expect(last_response.body).to include('Back')
+  end
 end
