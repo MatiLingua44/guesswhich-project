@@ -447,4 +447,116 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('This email address is not registered')
     expect(last_response.body).to include('Back To Login')
   end
+
+  it 'renders the password reset form when token is valid' do
+    user = User.create(
+      username: 'testuser',
+      email: 'testuser@example.com',
+      password: 'password',
+      password_reset_token: 'validtoken',
+      password_reset_sent_at: 1.hour.ago
+    )
+
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    get "/password_resets/#{user.password_reset_token}/edit"
+
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to include('New Password')
+  end
+
+  it 'redirects to the notice page when token has expired' do
+    user = User.create(
+      username: 'testuser',
+      email: 'testuser@example.com',
+      password: 'password',
+      password_reset_token: 'expiredtoken',
+      password_reset_sent_at: 3.hours.ago
+    )
+
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    get "/password_resets/#{user.password_reset_token}/edit"
+
+    expect(last_response).to be_redirect
+    follow_redirect!
+    expect(last_request.path).to eq('/password_resets/notice')
+    expect(last_response.body).to include('The token has expired, please try again')
+  end
+
+  it 'resets the password successfully when token is valid' do
+    user = User.create(
+      username: 'testuser',
+      email: 'testuser@example.com',
+      password: 'oldpassword',
+      password_reset_token: 'validtoken',
+      password_reset_sent_at: 1.hour.ago
+    )
+
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    patch "/password_resets/#{user.password_reset_token}", { password: 'newpassword' }
+
+    expect(user.reload.authenticate('newpassword')).to be_truthy
+    expect(user.password_reset_token).to be_nil
+    expect(user.password_reset_sent_at).to be_nil
+
+    expect(last_response).to be_redirect
+    follow_redirect!
+    expect(last_request.path).to eq('/password_resets/notice')
+    expect(last_response.body).to include('The password has been successfully reset')
+  end
+
+  it 'redirects to the notice page when token is invalid' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    patch "/password_resets/invalidtoken", { password: 'newpassword' }
+
+    expect(last_response).to be_redirect
+    follow_redirect!
+    expect(last_request.path).to eq('/password_resets/notice')
+    expect(last_response.body).to include('This email address is not registered')
+  end
+
+  it 'clears the password reset token and timestamp' do
+    user = User.create(
+      username: 'testuser',
+      email: 'testuser@example.com',
+      password: 'password',
+      password_reset_token: 'sometoken',
+      password_reset_sent_at: 1.hour.ago
+    )
+
+    user.clear_password_reset_token!
+
+    expect(user.password_reset_token).to be_nil
+    expect(user.password_reset_sent_at).to be_nil
+
+    reloaded_user = User.find(user.id)
+    expect(reloaded_user.password_reset_token).to be_nil
+    expect(reloaded_user.password_reset_sent_at).to be_nil
+  end
 end
