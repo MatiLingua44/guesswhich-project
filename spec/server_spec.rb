@@ -318,7 +318,6 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:user_score]).to eq(60)
   end
 
-
   it 'finishes the game when answer is correct and reaches 15 questions' do
     post '/login', {
       username: 'testuser',
