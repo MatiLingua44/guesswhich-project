@@ -295,9 +295,7 @@ class App < Sinatra::Application
 
         if user_name
 
-            existing_user = User.find_by(username: user_name)
-
-            if existing_user
+            if User.find_by(username: user_name)
                 session[:error] = "The username is already being used. Please use a different one"
                 redirect '/failed'
             else
@@ -309,10 +307,8 @@ class App < Sinatra::Application
         end
 
         if e_mail
-
-            existing_email = User.find_by(email: e_mail)
             
-            if existing_email
+            if User.find_by(email: e_mail)
                 session[:error] = "The email is already being used. Please use a different one"
                 redirect '/failed'
             else
