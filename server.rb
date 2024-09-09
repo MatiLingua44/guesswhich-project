@@ -309,7 +309,6 @@ class App < Sinatra::Application
     # Restricts paths not allowed to get if not logged in
     before do
         public_paths = %w[/login /register / /failed /password_resets/new /password_resets /password_resets/notice]
-
         public_path_patterns = [
           %r{^/password_resets/\w{22}/edit$},
           %r{^/password_resets/\w{22}$}
