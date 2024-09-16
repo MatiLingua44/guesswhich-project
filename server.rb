@@ -179,9 +179,27 @@ class App < Sinatra::Application
             if existing_answer&.is_correct
                 session[:question_count] ||= 0
                 session[:question_count] += 1
+
                 session[:user_score] ||= 0
                 session[:user_score] += 10
                 @score = session[:user_score]
+
+                session[:count] ||= 0
+                session[:count] += 1
+                @count = session[:count]
+
+                if @count == 1
+                    session[:streak1] = true
+                end
+                if @count == 3
+                    session[:streak2] = true
+                end
+                if @count == 5
+                    session[:streak3] = true
+                end
+                @streak1 = session[:streak1]
+                @streak2 = session[:streak2]
+                @streak3 = session[:streak3]
 
                 if user.score < session[:user_score]
                     user.update(score: session[:user_score])
@@ -191,8 +209,14 @@ class App < Sinatra::Application
                     session[:title] = "Congratulations, You won!"
                     redirect '/finish'
                 end
-                redirect '/questions'
+                erb :'questions/game-stats'
             elsif !existing_answer.is_correct
+                if session[:streak2]
+                    session[:count] = 0
+                    session[:streak2] = false
+                    redirect "/questions"
+                end
+                session[:count] = 0
                 session[:question_count] = 0
                 session[:user_score] = 0
                 user.update(score: user.score - 5)
