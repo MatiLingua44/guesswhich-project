@@ -167,6 +167,7 @@ class App < Sinatra::Application
             session[:title] = "You ran out of time!"
             processed_questions << @questions.description
             @answers = @questions.answers.all
+            @correct_answer_id = @answers.find_by(is_correct: true).id
             erb :'questions/show'
         end
     end
