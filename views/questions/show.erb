@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= @eventTitle %> | Guesswhich!</title>
+  <title>Guesswhich!</title>
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
   <style>
       body {
@@ -149,6 +149,19 @@
               opacity: 1;
           }
       }
+
+      button.correct {
+          background-color: #4CAF50;
+          color: white;
+          transform: none;
+      }
+
+      button.incorrect {
+          background-color: #f44336;
+          color: white;
+          transform: none;
+      }
+
   </style>
 </head>
 <body>
@@ -164,9 +177,10 @@
   <% @answers.shuffle.each do |answer| %>
     <form action="/questions" method="post">
       <input type="hidden" name="answer" id="<%= answer.id %>" value="<%= answer.id %>" />
-      <button type="submit" id="answer"><%= answer.description %></button>
+      <button type="submit" class="option" data-answer-id="<%= answer.id %>"><%= answer.description %></button>
     </form>
   <% end %>
+
   <a href="/menu" class="backbutton">Back</a>
 </div>
 
@@ -183,6 +197,42 @@
             timeLeft--;
         }
     }, 1000);
+
+    const correctAnswerId = '<%= @correct_answer_id %>'; // Este valor debe ser pasado desde el servidor con la ID correcta
+
+    document.querySelectorAll('.option').forEach(button => {
+        button.addEventListener('click', function() {
+            const selectedAnswerId = this.getAttribute('data-answer-id');
+
+            // Deshabilitar todos los botones y aplicar la clase 'no-hover'
+            document.querySelectorAll('.option').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('no-hover'); // Agregar clase para deshabilitar hover
+            });
+
+            // Comprobar si la respuesta seleccionada es la correcta
+            if (selectedAnswerId === correctAnswerId) {
+                this.classList.add('correct');
+            } else {
+                this.classList.add('incorrect');
+            }
+
+            setTimeout(() => {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/questions';
+
+                const hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = 'answer';
+                hiddenField.value = selectedAnswerId;
+                form.appendChild(hiddenField);
+
+                document.body.appendChild(form);
+                form.submit();
+            }, 1500);
+        });
+    });
 </script>
 </body>
 </html>
