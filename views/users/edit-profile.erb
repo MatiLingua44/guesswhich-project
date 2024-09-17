@@ -38,21 +38,6 @@
           font-family: 'Marcellus', serif;
       }
 
-      .user-info {
-          text-align: left;
-          margin: 20px auto;
-          padding: 20px;
-          background-color: #fff;
-          border-radius: 10px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          color: #333;
-      }
-
-      .user-info p {
-          margin: 10px 0;
-          font-size: 18px;
-      }
-
       .button {
           display: block;
           width: 200px;
@@ -132,13 +117,7 @@
 <body>
 
 <div class="container">
-  <h1>User Information</h1>
-  <div class="user-info">
-    <p><strong>Names:</strong> <%= @user.names %></p>
-    <p><strong>Username:</strong> <%= @user.username %></p>
-    <p><strong>Email:</strong> <%= @user.email %></p>
-    <p><strong>Score:</strong> <%= @user.score %></p>
-  </div>
+  <h1>Edit Profile</h1>
 
   <form action="/profile-modification" method="post">
     <label for="username">Username:</label>

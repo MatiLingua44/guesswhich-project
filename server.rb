@@ -307,7 +307,6 @@ class App < Sinatra::Application
 
     # Shows user edit window
     get '/edit-profile' do
-        @user = User.find_by(username: session[:username])
         erb :'users/edit-profile'
     end
 
