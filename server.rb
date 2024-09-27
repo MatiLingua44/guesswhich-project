@@ -140,6 +140,10 @@ class App < Sinatra::Application
         session[:user_score] = 0
         processed_questions.clear
         session[:question_count] = 0
+        session[:streak1] = false
+        session[:streak2] = false
+        session[:streak3] = false
+        session[:count] = 0
         event_titles = {
           '0' => "Second World War",
           '1' => "Industrial Revolution",
@@ -156,6 +160,9 @@ class App < Sinatra::Application
     get '/questions' do
         selected_event = session[:selected_event]
         @score = session[:user_score] ||= 0
+        @streak1 = session[:streak1] ||= false
+        @streak2 = session[:streak2] ||= false
+        @streak3 = session[:streak3] ||= false
         @questions = Question.where(event: selected_event.to_i)
                              .where.not(description: processed_questions)
                              .order("RANDOM()").first
@@ -189,13 +196,13 @@ class App < Sinatra::Application
                 session[:count] += 1
                 @count = session[:count]
 
-                if @count == 1
+                if @count == 3
                     session[:streak1] = true
                 end
-                if @count == 3
+                if @count == 5
                     session[:streak2] = true
                 end
-                if @count == 5
+                if @count == 8
                     session[:streak3] = true
                 end
                 @streak1 = session[:streak1]
