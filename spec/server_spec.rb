@@ -392,6 +392,91 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('You ran out of time!')
   end
 
+    
+  it 'sets extraTimeStreak to true when count is 3' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+   
+    question = Question.create(description: "Test question", event: 1)
+    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    post '/questions', { answer: correct_answer.id }, 'rack.session' => {
+      count: 2,
+      question_count: 2,
+      user_score: 20,
+      username: 'testuser',
+      extraTimeStreak: false
+    }
+
+    expect(last_response).to be_ok
+
+    expect(last_response.body).to include('You answer is correct!')
+    expect(last_request.env['rack.session'][:count]).to eq(3)
+    expect(last_request.env['rack.session'][:extraTimeStreak]).to eq(true)
+  end
+
+  it 'sets skipQuestionStreak to true when count is 5' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+   
+    question = Question.create(description: "Test question", event: 1)
+    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    post '/questions', { answer: correct_answer.id }, 'rack.session' => {
+      count: 4,
+      question_count: 4,
+      user_score: 40,
+      username: 'testuser',
+      skipQuestionStreak: false
+    }
+
+    expect(last_response).to be_ok
+
+    expect(last_response.body).to include('You answer is correct!')
+    expect(last_request.env['rack.session'][:count]).to eq(5)
+    expect(last_request.env['rack.session'][:skipQuestionStreak]).to eq(true)
+  end
+
+  it 'sets secondChanceStreak to true when count is 8' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+   
+    question = Question.create(description: "Test question", event: 1)
+    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    post '/questions', { answer: correct_answer.id }, 'rack.session' => {
+      count: 7,
+      question_count: 7,
+      user_score: 70,
+      username: 'testuser',
+      secondChanceStreak: false
+    }
+
+    expect(last_response).to be_ok
+
+    expect(last_response.body).to include('You answer is correct!')
+    expect(last_request.env['rack.session'][:count]).to eq(8)
+    expect(last_request.env['rack.session'][:secondChanceStreak]).to eq(true)
+  end
+
   it 'increments score and redirects to /questions when answer is correct' do
     post '/login', {
       username: 'testuser',
