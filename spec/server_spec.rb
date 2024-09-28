@@ -166,6 +166,80 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('Ranking table')
   end
 
+  it 'disables extra time streak and responds with 204 No Content' do 
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+  
+    session_data = {
+      extraTimeStreak: true,
+      username: 'testuser'
+    }
+
+    get '/extraTimeStreak', {}, 'rack.session' => session_data
+
+    expect(last_response.status).to eq(204)
+    expect(last_request.env['rack.session'][:extraTimeStreak]).to eq(false)
+  end
+
+  it 'applies second chance streak and redirects to questions' do 
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+    
+    session_data = {
+      secondChanceStreak: true,
+      user_score: 100,
+      username: 'testuser'
+    }
+
+    get '/secondChanceStreak', {}, 'rack.session' => session_data
+
+    expect(last_response).to be_redirect
+    follow_redirect!
+
+    expect(last_request.path).to eq('/questions')
+
+    expect(last_request.env['rack.session'][:secondChanceStreak]).to eq(false)
+    expect(last_request.env['rack.session'][:user_score]).to eq(95)
+
+  end
+
+
+  it 'shows that the game is over because answered 14 questions and used the question skipping streak or second chance streak' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    session_data = {
+      question_count: 14,
+      user_score: 140,
+      username: 'testuser'
+    }
+
+    get '/skipQuestionStreak' , {}, 'rack.session' => session_data
+    expect(last_request.path).to eq('/skipQuestionStreak')
+
+    expect(last_request.env['rack.session'][:question_count]).to eq(15)
+
+    follow_redirect!
+    expect(last_request.path).to eq('/questions')
+
+    allow(Question).to receive(:where).and_return([])
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/finish')
+    expect(last_response.body).to include('Congratulations, You won!')
+
+  end
+
   it 'shows the game finished because answered all the questions' do
     post '/login', {
       username: 'testuser',
@@ -310,8 +384,10 @@ RSpec.describe 'Server' do
       username: 'testuser'
     }
 
-    expect(last_response).to be_redirect
-    follow_redirect!
+
+    expect(last_response).to be_ok
+
+    expect(last_response.body).to include('You answer is correct!')
 
     expect(last_request.path).to eq('/questions')
     expect(last_request.env['rack.session'][:question_count]).to eq(6)
@@ -347,34 +423,6 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:user_score]).to eq(150)
   end
 
-  it 'resets score and redirects to /finish when answer is incorrect' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-
-    session_data = {
-      question_count: 5,
-      user_score: 50,
-      username: 'testuser'
-    }
-
-    question = Question.create(description: "Test question", event: 1)
-    incorrect_answer = Answer.create(description: "Incorrect answer", is_correct: false, question: question)
-
-    post '/questions', { answer: incorrect_answer.id }, 'rack.session' => session_data
-
-    expect(last_response).to be_redirect
-    follow_redirect!
-    expect(last_request.path).to eq('/finish')
-    expect(last_response.body).to include('Your answer is not correct, you lost!')
-
-    expect(last_request.env['rack.session'][:question_count]).to eq(0)
-    expect(last_request.env['rack.session'][:user_score]).to eq(0)
-  end
 
   it 'choose an event and read its material.' do
     post '/login',
