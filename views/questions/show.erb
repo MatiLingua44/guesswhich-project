@@ -162,21 +162,68 @@
       }
 
     #streak-item1 {
-        top: 150px;
+        top: 150px; /* Posición específica para streak-item1 */
         right: 20px;
-        background-color: #a25f4b;
-        color: #fff;
+        background-color: #a25f4b; 
+        color: #fff; 
+        padding: 10px 20px; /* Espaciado interno */
+        border-radius: 10px; /* Bordes redondeados */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para profundidad */
+        cursor: pointer; /* Aparece como botón interactivo */
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out; /* Transiciones suaves */
     }
-    
+
+    #streak-item1:hover {
+        background-color: #d4a373; 
+        transform: scale(1.05); /* Ligera ampliación en hover */
+    }
+
+    #streak-item1:active {
+        transform: scale(0.95); /* Efecto de presionado */
+    }
+
     #streak-item2 {
-        top: 200px;
+        top: 200px; /* Posición específica para streak-item2 */
         right: 20px;
+        background-color: #a25f4b; 
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
     }
-    
+
+    #streak-item2:hover {
+        background-color: #d4a373; 
+        transform: scale(1.05);
+    }
+
+    #streak-item2:active {
+        transform: scale(0.95);
+    }
+
     #streak-item3 {
-        top: 250px;
+        top: 250px; /* Posición específica para streak-item3 */
         right: 20px;
+        background-color: #a25f4b; 
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
     }
+
+    #streak-item3:hover {
+        background-color: #d4a373; 
+        transform: scale(1.05);
+    }
+
+    #streak-item3:active {
+        transform: scale(0.95);
+    }
+
 
       @keyframes fadeIn {
           from {
@@ -207,22 +254,20 @@
 <div class="container">
   <div id="countdown">15</div>
   <div id="points-container">
-    <div class="point-item">Points: <%= @streak1 %></div>
+    <div class="point-item">Points: <%= @score %></div>
   </div>
 
-  <% if @streak1 || @streak2 || @streak3 %>
    <div id="streak-container">
-        <% if @streak1 %>
-           <button id="streak-item1" onclick="handleClick('streak1')">streak1</button>
+        <% if @extraTimeStreak %>
+           <button id="streak-item1" onclick="handleClick('extraTimeStreak')">Extra Time</button>
        <% end %>
-        <% if @streak2 %>
-             <button id="streak-item2" onclick="handleClick('streak2')">streak2</button>
+        <% if @skipQuestionStreak %>
+             <button id="streak-item2" onclick="handleClick('skipQuestionStreak')">Skip Question</button>
         <% end %>
-        <% if @streak3 %>
-            <button id="streak-item3" onclick="handleClick('streak3')">streak3</button>
+        <% if @secondChanceStreak %>
+            <button id="streak-item3">Second Chance</button>
         <% end %>
     </div>
-<% end %>
 
   <h1><%= @questions.description %></h1>
   <p>Choose an answer:</p>
@@ -238,35 +283,32 @@
 </div>
 
 <script>
-    let timeLeft = 15;
+    let timeLeft = 150000;
     function handleClick(streak) {
-        if (streak === 'streak1') {
+        if (streak === 'extraTimeStreak') {
             timeLeft = 25;
             document.getElementById("streak-item1").style.visibility = "hidden"; 
             updateVisibility(streak);
-        } else if (streak === 'streak2') {
+        } else if (streak === 'skipQuestionStreak') {
             document.getElementById("streak-item2").style.visibility = "hidden"; 
-            window.location.href = '/streak2';
-        } else if (streak === 'streak3') {
-            updateVisibility(streak);
-            document.getElementById("streak-item3").style.visibility = "hidden"; 
+            window.location.href = '/skipQuestionStreak';
         }
     }
 
-    function updateVisibility(streak) {
-    fetch(`/${streak}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    }).then(response => {
-        if (response.ok) {
-            console.log('Visibility updated successfully');
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-    });
-}
+    function updateVisibility() {
+        fetch('/extraTimeStreak', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            if (response.ok) {
+                console.log('Visibility updated successfully');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+    }
 
     const countdownElement = document.getElementById('countdown');
 

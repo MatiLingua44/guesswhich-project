@@ -77,7 +77,7 @@ class App < Sinatra::Application
 
     # Route used when the game finishes
     get '/finish' do
-        processed_questions.clear
+        @secondChanceStreak = session[:secondChanceStreak] 
         @title = session[:title]
         erb :finish
     end
@@ -140,9 +140,9 @@ class App < Sinatra::Application
         session[:user_score] = 0
         processed_questions.clear
         session[:question_count] = 0
-        session[:streak1] = false
-        session[:streak2] = false
-        session[:streak3] = false
+        session[:extraTimeStreak] = false
+        session[:skipQuestionStreak] = false
+        session[:secondChanceStreak] = false
         session[:count] = 0
         event_titles = {
           '0' => "Second World War",
@@ -160,9 +160,9 @@ class App < Sinatra::Application
     get '/questions' do
         selected_event = session[:selected_event]
         @score = session[:user_score] ||= 0
-        @streak1 = session[:streak1] ||= false
-        @streak2 = session[:streak2] ||= false
-        @streak3 = session[:streak3] ||= false
+        @extraTimeStreak = session[:extraTimeStreak] ||= false
+        @skipQuestionStreak = session[:skipQuestionStreak] ||= false
+        @secondChanceStreak = session[:secondChanceStreak] ||= false
 
         @questions = Question.where(event: selected_event.to_i)
                              .where.not(description: processed_questions)
@@ -186,7 +186,6 @@ class App < Sinatra::Application
     end
 
     post '/questions' do
-        @streak1 = session[:streak1]  
         if session[:username]
             user = User.find_by(username: session[:username])
             existing_answer = Answer.find_by(id: params["answer"])
@@ -204,17 +203,17 @@ class App < Sinatra::Application
                 @count = session[:count]
 
                 if @count == 3 
-                    session[:streak1] = true
+                    session[:extraTimeStreak] = true
                 end
                 if @count == 5 
-                    session[:streak2] = true
+                    session[:skipQuestionStreak] = true
                 end
                 if @count == 8 
-                    session[:streak3] = true
+                    session[:secondChanceStreak] = true
                 end
-                @streak1 = session[:streak1]
-                @streak2 = session[:streak2]
-                @streak3 = session[:streak3]
+                @extraTimeStreak = session[:extraTimeStreak]
+                @skipQuestionStreak = session[:skipQuestionStreak]
+                @secondChanceStreak = session[:secondChanceStreak]
 
                 if user.score < session[:user_score]
                     user.update(score: session[:user_score])
@@ -226,14 +225,6 @@ class App < Sinatra::Application
                 end
                 erb :'questions/game-stats'
             elsif !existing_answer.is_correct
-                if session[:streak2]
-                    session[:count] = 0
-                    session[:streak2] = false
-                    redirect "/questions"
-                end
-                session[:count] = 0
-                session[:question_count] = 0
-                session[:user_score] = 0
                 user.update(score: user.score - 5)
                 if user.score < 0
                     user.update(score: 0)
@@ -245,18 +236,24 @@ class App < Sinatra::Application
         end
     end
 
-    get '/streak1' do
-        session[:streak1] = false
+    get '/extraTimeStreak' do
+        session[:extraTimeStreak] = false
 
         status 204
     end
 
-    get '/streak2' do
+    get '/skipQuestionStreak' do
         session[:question_count] ||= 0
         session[:question_count] += 1
 
-        session[:streak2] = false
+        session[:skipQuestionStreak] = false
         redirect '/questions'
+    end
+
+    get '/secondChanceStreak' do
+        session[:secondChanceStreak] = false
+        session[:user_score] -= 5
+        redirect '/questions' 
     end
 
     Mail.defaults do

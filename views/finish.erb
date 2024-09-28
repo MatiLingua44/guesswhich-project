@@ -70,8 +70,18 @@
 
 <div class="container">
   <h1><%= @title %></h1>
-  <a href="/menu" class="button">Play Again!</a>
+  <a href="/menu" class="button" id="play-again-button">Play Again!</a>
+  <% if @secondChanceStreak %>
+    <button class="button" id="saltar-button" onclick="handleClick()">Saltar!</button>
+  <% end %>
 </div>
+<script>
+function handleClick() {
+    window.location.href = '/secondChanceStreak';
+    document.getElementById("saltar-button").style.visibility = "hidden";
+}
 
+
+</script>
 </body>
 </html>
