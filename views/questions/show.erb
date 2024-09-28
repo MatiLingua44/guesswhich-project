@@ -288,7 +288,7 @@
         if (streak === 'extraTimeStreak') {
             timeLeft = 25;
             document.getElementById("streak-item1").style.visibility = "hidden"; 
-            updateVisibility(streak);
+            updateVisibility();
         } else if (streak === 'skipQuestionStreak') {
             document.getElementById("streak-item2").style.visibility = "hidden"; 
             window.location.href = '/skipQuestionStreak';

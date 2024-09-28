@@ -336,6 +336,33 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('Reset Score')
   end 
 
+  it 'Redirect to completion page when user answers incorrectly' do 
+    post '/login',{
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com  '
+    } 
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+
+    question = Question.create(description: "Test question", event: 1)
+    incorrect_answer = Answer.create(description: "Incorrect answer", is_correct: false, question: question)
+
+    post '/questions', { answer: incorrect_answer.id }, 'rack.session' => {
+      question_count: 5,
+      user_score: 50,
+      username: 'testuser'
+    }
+
+    follow_redirect! 
+
+    expect(last_request.path).to eq('/finish')
+    expect(last_response.body).to include('Your answer is not correct, you lost!')
+    expect(last_request.env['rack.session'][:user_score]).to eq(50)
+
+  end
+
   it 'Redirect to finish page when user runs out of time' do
     post '/login',{
       username: 'testuser',
