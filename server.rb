@@ -163,13 +163,19 @@ class App < Sinatra::Application
         @streak1 = session[:streak1] ||= false
         @streak2 = session[:streak2] ||= false
         @streak3 = session[:streak3] ||= false
+
         @questions = Question.where(event: selected_event.to_i)
                              .where.not(description: processed_questions)
                              .order("RANDOM()").first
 
         if @questions.nil?
-            session[:title] = "You answered all the questions."
-            redirect '/finish'
+            if session[:question_count] == 15
+                session[:title] = "Congratulations, You won!"
+                redirect '/finish'
+            else
+                session[:title] = "You answered all the questions."
+                redirect '/finish'
+            end
         else
             session[:title] = "You ran out of time!"
             processed_questions << @questions.description
@@ -180,6 +186,7 @@ class App < Sinatra::Application
     end
 
     post '/questions' do
+        @streak1 = session[:streak1]  
         if session[:username]
             user = User.find_by(username: session[:username])
             existing_answer = Answer.find_by(id: params["answer"])
@@ -196,13 +203,13 @@ class App < Sinatra::Application
                 session[:count] += 1
                 @count = session[:count]
 
-                if @count == 3
+                if @count == 3 
                     session[:streak1] = true
                 end
-                if @count == 5
+                if @count == 5 
                     session[:streak2] = true
                 end
-                if @count == 8
+                if @count == 8 
                     session[:streak3] = true
                 end
                 @streak1 = session[:streak1]
@@ -236,6 +243,20 @@ class App < Sinatra::Application
                 redirect '/finish'
             end
         end
+    end
+
+    get '/streak1' do
+        session[:streak1] = false
+
+        status 204
+    end
+
+    get '/streak2' do
+        session[:question_count] ||= 0
+        session[:question_count] += 1
+
+        session[:streak2] = false
+        redirect '/questions'
     end
 
     Mail.defaults do

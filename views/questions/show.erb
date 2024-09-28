@@ -207,8 +207,9 @@
 <div class="container">
   <div id="countdown">15</div>
   <div id="points-container">
-    <div class="point-item">Points: <%= @score %></div>
+    <div class="point-item">Points: <%= @streak1 %></div>
   </div>
+
   <% if @streak1 || @streak2 || @streak3 %>
    <div id="streak-container">
         <% if @streak1 %>
@@ -237,17 +238,35 @@
 </div>
 
 <script>
-    let timeLeft = 1500;
+    let timeLeft = 15;
     function handleClick(streak) {
         if (streak === 'streak1') {
             timeLeft = 25;
             document.getElementById("streak-item1").style.visibility = "hidden"; 
+            updateVisibility(streak);
         } else if (streak === 'streak2') {
             document.getElementById("streak-item2").style.visibility = "hidden"; 
+            window.location.href = '/streak2';
         } else if (streak === 'streak3') {
+            updateVisibility(streak);
             document.getElementById("streak-item3").style.visibility = "hidden"; 
         }
     }
+
+    function updateVisibility(streak) {
+    fetch(`/${streak}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            console.log('Visibility updated successfully');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+    });
+}
 
     const countdownElement = document.getElementById('countdown');
 
