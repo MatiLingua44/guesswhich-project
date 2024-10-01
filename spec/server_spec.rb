@@ -718,4 +718,104 @@ RSpec.describe 'Server' do
     expect(reloaded_user.password_reset_token).to be_nil
     expect(reloaded_user.password_reset_sent_at).to be_nil
   end
+
+  it 'modifies the username successfully' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/edit-profile'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/edit-profile')
+
+    post '/profile-modification', {
+      username: 'new_username'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/edit-profile')
+
+    get '/user'
+    expect(last_response.body).to include('new_username')
+  end
+
+  it 'fails to modify the username if it is already in use' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
+
+    post '/profile-modification', {
+      username: 'existing_user'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/failed')
+
+    get '/failed'
+    expect(last_response.body).to include('The username is already being used')
+  end
+
+  it 'modifies the email successfully' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/edit-profile'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/edit-profile')
+
+    post '/profile-modification', {
+      email: 'new_email@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/edit-profile')
+
+    get '/user'
+    expect(last_response.body).to include('new_email@example.com')
+  end
+
+  it 'fails to modify the email if it is already in use' do
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
+
+    post '/profile-modification', {
+      email: 'existing@example.com'
+    }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/failed')
+
+    get '/failed'
+    expect(last_response.body).to include('The email is already being used')
+  end
 end
