@@ -251,8 +251,11 @@ class App < Sinatra::Application
     end
 
     get '/secondChanceStreak' do
-        session[:secondChanceStreak] = false
+        session[:question_count] ||= 0
+        session[:question_count] += 1
         session[:user_score] -= 5
+        
+        session[:secondChanceStreak] = false
         redirect '/questions' 
     end
 

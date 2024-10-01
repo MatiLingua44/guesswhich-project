@@ -385,7 +385,7 @@ RSpec.describe 'Server' do
       selected_event: 1 
     }
 
-    get '/questions',{}, 'rack.session' => session_data
+    get '/questions',{answer: incorrect_answer}, 'rack.session' => session_data
 
     get '/finish'
     expect(last_request.path).to eq('/finish')
