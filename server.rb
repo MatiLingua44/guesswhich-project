@@ -153,6 +153,8 @@ class App < Sinatra::Application
           '5' => "First World War"
         }
         @eventTitle = event_titles[event]
+        user = User.find_by(username: session[:username])
+        @admin = user.is_admin
         erb :'show-event'
     end
 
