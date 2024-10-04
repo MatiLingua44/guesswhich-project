@@ -236,6 +236,36 @@ class App < Sinatra::Application
         end
     end
 
+    get '/add-questions' do
+        erb :'questions/add-questions'
+    end
+
+    post '/add-questions' do
+       question = params[:question]
+       correct_answer = params[:correct_answer]
+       incorrect_answer1 = params[:incorrect_answer1]
+       incorrect_answer2 = params[:incorrect_answer2]
+       incorrect_answer3 = params[:incorrect_answer3]
+       event = session[:selected_event]
+
+       existing_question = Question.find_by(description: question)
+
+       if existing_question
+            @result = session[:result] = "The question is already in the database. Please insert a different one"
+            
+       else
+            question = Question.create(description: question, event: event)
+            
+            Answer.create(description: correct_answer , question: question , is_correct: true)
+            Answer.create(description: incorrect_answer1 ,question: question , is_correct: false)
+            Answer.create(description: incorrect_answer2 ,question: question , is_correct: false)
+            Answer.create(description: incorrect_answer3 ,question: question , is_correct: false)
+
+            @result = session[:result] = "Question added successfully"
+       end     
+       erb :'questions/question_status'
+    end
+
     get '/extraTimeStreak' do
         session[:extraTimeStreak] = false
 
