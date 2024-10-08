@@ -29,6 +29,8 @@ class App < Sinatra::Application
 
     get '/menu' do
         @username = session[:username]
+        user = User.find_by(username: session[:username])
+        @admin = user.is_admin
         erb :menu
     end
 
