@@ -36,6 +36,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_06_17_154641) do
     t.string "password"
     t.integer "score"
     t.string "password_digest"
+    t.boolean "is_admin", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string "password_reset_token"

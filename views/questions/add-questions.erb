@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Main Menu | Guesswhich!</title>
+  <title><%= @eventTitle %> | Guesswhich!</title>
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
   <style>
       body {
@@ -42,7 +42,7 @@
           display: block;
           width: 200px;
           margin: 10px auto;
-          padding: 12px 20px;
+          padding: 10px 18px;
           font-size: 18px;
           background-color: #a25f4b;
           color: #fff;
@@ -65,13 +65,33 @@
           transform: scale(0.98);
       }
 
-      .button2 {
+
+      form {
+          text-align: center;
+      }
+      label {
+          display: block;
+          margin-bottom: 10px;
+          color: #5a3e36;
+          font-weight: bold;
+      }
+
+      input[type="text"] {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 20px;
+          border: 1px solid #d4a373;
+          border-radius: 5px;
+          box-sizing: border-box;
+          background-color: #fff8e1;
+      }
+      input[type="submit"] {
           display: block;
           width: 200px;
           margin: 10px auto;
-          padding: 12px 20px;
+          padding: 10px 18px;
           font-size: 18px;
-          background-color: #555555;
+          background-color: #a25f4b;
           color: #fff;
           text-align: center;
           text-decoration: none;
@@ -81,44 +101,52 @@
           transition: background-color 0.3s ease, transform 0.3s;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
-
-      .button2:hover {
-          background-color: #ffffff;
-          color: #212020;
+      input[type="submit"]:hover {
+          background-color: #d4a373;
+          color: #5a3e36;
           transform: scale(1.05);
       }
-
-      .button2:active {
+      input[type="submit"]:active {
           transform: scale(0.98);
       }
-
-      .username {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          font-size: 16px;
-          color: #fff;
-          background-color: rgba(0, 0, 0, 0.6);
-          padding: 5px 10px;
-          border-radius: 5px;
+      p {
+          color: #5a3e36;
+      }
+      a {
+          color: #a25f4b;
+          text-decoration: none;
+          font-weight: 700;
+      }
+      a:hover {
+          text-decoration: underline;
       }
   </style>
 </head>
 <body>
 
-<div class="username">User: <%= @username %></div>
-
 <div class="container">
-  <h1>Main Menu</h1>
-  <a href="/events" class="button">Play</a>
-  <a href="/ranking" class="button">Ranking</a>
-  <a href="/question-statistics" class="button">Statistics</a>
-  <a href="/user" class="button">User Info</a>
-  <%if @admin%>
-    <a href="/statistics" class="button2"> Statistics</a>
-  <% end %>
-  <a href="/" class="button">Exit</a>
+  <h1><%= @eventTitle %></h1>
+  <form action="/add-questions"  method="post">
+  <label for="question">New Question:</label>
+  <input type="text" id="question" name="question" value="¿ ?"required><br><br>
+  <label for="correct_answer">Correct Answer:</label>
+  <input type="text" id="correct_answer" name="correct_answer" required><br><br>
+  <label for="incorrect_answer1">Incorrect Answer:</label>
+  <input type="text" id="incorrect_answer1" name="incorrect_answer1" required><br><br>
+  <label for="incorrect-answer-2">Incorrect Answer:</label>
+  <input type="text" id="incorrect_answer2" name="incorrect_answer2" required><br><br>
+  <label for="incorrect_answer3">Incorrect Answer:</label>
+  <input type="text" id="incorrect_answer3" name="incorrect_answer3" required><br><br>
+  <input type="submit" class="button" value="Add">
+  </form>
+  <a href="/events" class="button">Back</a>
 </div>
-
+<script>
+    document.getElementById('button').addEventListener('click', function() {
+        history.back();
+    });
+</script>
 </body>
 </html>
+
+
