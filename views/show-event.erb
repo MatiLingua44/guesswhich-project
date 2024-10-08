@@ -64,32 +64,6 @@
       .button:active {
           transform: scale(0.98);
       }
-      .button2 {
-          display: block;
-          width: 200px;
-          margin: 10px auto;
-          padding: 12px 20px;
-          font-size: 18px;
-          background-color: #555555;
-          color: #fff;
-          text-align: center;
-          text-decoration: none;
-          border: none;
-          border-radius: 50px;
-          cursor: pointer;
-          transition: background-color 0.3s ease, transform 0.3s;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .button2:hover {
-          background-color: #ffffff;
-          color: #212020;
-          transform: scale(1.05);
-      }
-
-      .button2:active {
-          transform: scale(0.98);
-      }
   </style>
 </head>
 <body>
@@ -98,13 +72,7 @@
   <h1><%= @eventTitle %></h1>
   <a href="/questions" class="button">Start</a>
   <a href="/learn-event" class="button"> Learn</a>
-  <%if @admin%>
-    <a href="/add-questions" class="button2"> Add Questions</a>
-    <a href="/statistics" class="button2"> Statistics</a>
-  <% end %>
-
   <a href="/events" class="button">Back</a>
-
 </div>
 
 </body>

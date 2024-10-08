@@ -7,7 +7,6 @@ class CreateUsersTable < ActiveRecord::Migration[7.1]
       t.string :password
       t.integer :score
       t.string :password_digest
-      t.boolean :is_admin, default: false
 
       t.datetime :created_at
       t.datetime :updated_at
