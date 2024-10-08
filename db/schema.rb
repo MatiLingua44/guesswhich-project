@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_17_205123) do
+ActiveRecord::Schema[7.2].define(version: 2024_06_17_154641) do
   create_table "answers", force: :cascade do |t|
     t.string "description"
     t.boolean "is_correct"
@@ -23,6 +23,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_17_205123) do
   create_table "questions", force: :cascade do |t|
     t.string "description"
     t.integer "event"
+    t.integer "correct_answered"
+    t.integer "incorrect_answered"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -33,8 +35,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_17_205123) do
     t.string "email"
     t.string "password"
     t.integer "score"
+    t.string "password_digest"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string "password_reset_token"
+    t.datetime "password_reset_sent_at"
   end
 
   add_foreign_key "answers", "questions"

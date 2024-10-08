@@ -38,6 +38,13 @@ class App < Sinatra::Application
         erb :'/ranking'
     end
 
+    # Shows the question statistics
+    get '/question-statistics' do
+        @correct_questions = Question.all.order('correct_answered DESC')
+        @incorrect_questions = Question.all.order('incorrect_answered DESC')
+        erb :'/question-statistics'
+    end
+
     # Shows the login page
     get '/login' do
         erb :login
@@ -190,6 +197,8 @@ class App < Sinatra::Application
             user = User.find_by(username: session[:username])
             existing_answer = Answer.find_by(id: params["answer"])
 
+            @question = Question.find_by(id: existing_answer.question)
+
             if existing_answer&.is_correct
                 session[:question_count] ||= 0
                 session[:question_count] += 1
@@ -202,13 +211,13 @@ class App < Sinatra::Application
                 session[:count] += 1
                 @count = session[:count]
 
-                if @count == 3 
+                if @count == 3
                     session[:extraTimeStreak] = true
                 end
-                if @count == 5 
+                if @count == 5
                     session[:skipQuestionStreak] = true
                 end
-                if @count == 8 
+                if @count == 8
                     session[:secondChanceStreak] = true
                 end
                 @extraTimeStreak = session[:extraTimeStreak]
@@ -223,9 +232,13 @@ class App < Sinatra::Application
                     session[:title] = "Congratulations, You won!"
                     redirect '/finish'
                 end
+
+                @question.update(correct_answered: @question.correct_answered + 1)
                 erb :'questions/game-stats'
+
             elsif !existing_answer.is_correct
                 user.update(score: user.score - 5)
+                @question.update(incorrect_answered: @question.incorrect_answered + 1)
                 if user.score < 0
                     user.update(score: 0)
                 end
