@@ -4,6 +4,9 @@ class CreateQuestionsTable < ActiveRecord::Migration[7.1]
       t.string :description
       t.integer :event
 
+      t.integer :correct_answered
+      t.integer :incorrect_answered
+
       t.timestamps
     end
   end

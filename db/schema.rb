@@ -23,6 +23,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_06_17_154641) do
   create_table "questions", force: :cascade do |t|
     t.string "description"
     t.integer "event"
+    t.integer "correct_answered"
+    t.integer "incorrect_answered"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
