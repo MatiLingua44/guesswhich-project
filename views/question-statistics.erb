@@ -110,13 +110,11 @@
     <% @correct_questions.each do |question| %>
       <tr>
         <td><%= question.description %></td>
-
         <%if question.correct_answered+question.incorrect_answered > 0 %>
           <td> % <%= (question.correct_answered*100)/((question.correct_answered+question.incorrect_answered)*1) %></td>
         <%else%>
           <td><%= "% 0" %></td>
         <% end %>
-
       </tr>
     <% end %>
     </tbody>
@@ -136,13 +134,11 @@
     <% @incorrect_questions.each do |question| %>
       <tr>
         <td><%= question.description %></td>
-
         <%if question.correct_answered+question.incorrect_answered > 0 %>
           <td> % <%= (question.incorrect_answered*100)/((question.correct_answered+question.incorrect_answered)*1) %></td>
         <%else%>
           <td><%= "% 0" %></td>
         <% end %>
-
       </tr>
     <% end %>
     </tbody>
