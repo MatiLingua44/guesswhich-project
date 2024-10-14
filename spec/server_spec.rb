@@ -27,6 +27,7 @@ RSpec.describe 'Server' do
     )
   end
 
+
   it 'redirects to the page of password resets 'do
     get '/password_resets/new' 
     expect(last_response.status).to eq(200)
@@ -385,7 +386,7 @@ RSpec.describe 'Server' do
       selected_event: 1 
     }
 
-    get '/questions',{answer: incorrect_answer}, 'rack.session' => session_data
+    get '/questions',{answer: incorrect_answer, question: question}, 'rack.session' => session_data
 
     get '/finish'
     expect(last_request.path).to eq('/finish')
