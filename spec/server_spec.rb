@@ -27,7 +27,6 @@ RSpec.describe 'Server' do
     )
   end
 
-
   it 'redirects to the page of password resets 'do
     get '/password_resets/new' 
     expect(last_response.status).to eq(200)
@@ -240,6 +239,47 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('Congratulations, You won!')
 
   end
+
+  it 'shows the question statistics page' do 
+    post '/login', {
+      username: 'testuser',
+      password: 'testuserpassword',
+      email: 'testuser@example.com'
+    }
+
+    get '/question-statistics'
+    expect(last_response.status).to eq(200)
+    expect(last_response.body).to include('Correct Answered Questions')
+    expect(last_response.body).to include('Incorrect Answered Questions')
+  end
+
+  it 'shows the page to add questions' do
+    post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'} 
+    get '/add-questions'
+    expect(last_response).to be_ok
+  end
+
+    it 'adds question, but it is already in the database' do
+      post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'} 
+      
+      get '/add-questions'
+      expect(last_response).to be_ok
+
+      question = Question.create(description: 'Test question', event: 1)
+
+      post '/add-questions', 'rack.session' => {
+        question: 'Test question' ,
+        correct_answer: '1',
+        incorrect_answer1: '2',
+        incorrect_answer2: '3',
+        incorrect_answer3: '4',
+        event: 1
+      }
+      
+      expect(last_request.env['rack.session'][:result]).to eq('The question is already in the database. Please insert a different one')
+
+    end
+
 
   it 'shows the game finished because answered all the questions' do
     post '/login', {
