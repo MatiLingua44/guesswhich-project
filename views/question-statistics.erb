@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking | Guesswhich!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+      body {
+          font-family: 'Raleway', sans-serif;
+          background-image: url('https://c.wallhere.com/photos/df/65/Tibia_PC_gaming_RPG_creature_drawing_women_druids-120582.jpg!d');
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-attachment: fixed;
+          color: #5a3e36;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+      }
+
+      .table-container {
+          background-color: #fdf5e6;
+          border-radius: 10px;
+          box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+          border: 1px solid #d4a373;
+          background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+          overflow: hidden;
+          width: 80%;
+          max-width: 1000px;
+          margin-bottom: 20px;
+          max-height: 400px;
+          overflow-y: auto;
+      }
+
+      h1 {
+          text-align: center;
+          color: #5a3e36;
+          font-family: 'Marcellus', serif;
+          margin: 20px 0;
+      }
+
+      table {
+          width: 100%;
+          border-collapse: collapse;
+      }
+
+      th, td {
+          border: 1px solid #d4a373;
+          padding: 10px;
+          text-align: left;
+          color: #5a3e36;
+      }
+
+      th {
+          background-color: #a25f4b;
+          color: #fff;
+      }
+
+      tr:nth-child(even) {
+          background-color: rgba(211, 185, 137, 0.2);
+      }
+
+      .button {
+          display: block;
+          width: 200px;
+          margin: 10px auto;
+          padding: 12px 20px;
+          font-size: 18px;
+          background-color: #a25f4b;
+          color: #fff;
+          text-align: center;
+          text-decoration: none;
+          border: none;
+          border-radius: 50px;
+          cursor: pointer;
+          transition: background-color 0.3s ease, transform 0.3s;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .button:hover {
+          background-color: #d4a373;
+          color: #5a3e36;
+          transform: scale(1.05);
+      }
+
+      .button:active {
+          transform: scale(0.98);
+      }
+
+      .container {
+          text-align: center;
+          padding: 20px;
+      }
+  </style>
+</head>
+<body>
+<div class="table-container">
+  <h1>Correct Answered Questions</h1>
+  <table>
+    <thead>
+    <tr>
+      <th>Question</th>
+      <th>Times Correct Answered</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @correct_questions.each do |question| %>
+      <tr>
+        <td><%= question.description %></td>
+        <%if question.correct_answered+question.incorrect_answered > 0 %>
+          <td> % <%= (question.correct_answered*100)/((question.correct_answered+question.incorrect_answered)*1) %></td>
+        <%else%>
+          <td><%= "% 0" %></td>
+        <% end %>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-container">
+  <h1>Incorrect Answered Questions</h1>
+  <table>
+    <thead>
+    <tr>
+      <th>Question</th>
+      <th>Times Incorrect Answered</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @incorrect_questions.each do |question| %>
+      <tr>
+        <td><%= question.description %></td>
+        <%if question.correct_answered+question.incorrect_answered > 0 %>
+          <td> % <%= (question.incorrect_answered*100)/((question.correct_answered+question.incorrect_answered)*1) %></td>
+        <%else%>
+          <td><%= "% 0" %></td>
+        <% end %>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="container">
+  <a href="/menu" class="button">Back</a>
+</div>
+
+</body>
+</html>

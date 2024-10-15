@@ -24,12 +24,13 @@
 
       .container {
           text-align: center;
-          padding: 30px;
+          padding: 75px;
           background-color: #fdf5e6;
           border-radius: 10px;
           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
           border: 1px solid #d4a373;
           background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+          height: 550px;
       }
 
       h1 {
@@ -42,7 +43,7 @@
           display: block;
           width: 200px;
           margin: 10px auto;
-          padding: 12px 20px;
+          padding: 10px 18px;
           font-size: 18px;
           background-color: #a25f4b;
           color: #fff;
@@ -64,48 +65,65 @@
       .button:active {
           transform: scale(0.98);
       }
-      .button2 {
-          display: block;
-          width: 200px;
-          margin: 10px auto;
-          padding: 12px 20px;
-          font-size: 18px;
-          background-color: #555555;
-          color: #fff;
+
+
+      form {
           text-align: center;
-          text-decoration: none;
-          border: none;
-          border-radius: 50px;
-          cursor: pointer;
-          transition: background-color 0.3s ease, transform 0.3s;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      label {
+          display: block;
+          margin-bottom: 10px;
+          color: #5a3e36;
+          font-weight: bold;
       }
 
-      .button2:hover {
-          background-color: #ffffff;
-          color: #212020;
-          transform: scale(1.05);
+
+      #question {
+          width: 100%;
+          padding: 30px;
+          margin-bottom: 20px;
+          border: 1px solid #d4a373;
+          border-radius: 5px;
+          box-sizing: border-box;
+          background-color: #fff8e1;
       }
 
-      .button2:active {
-          transform: scale(0.98);
+      input[type="text"] {
+          width: 100%;
+          padding: 3px;
+          margin-bottom: 10px;
+          border: 1px solid #d4a373;
+          border-radius: 3px;
+          box-sizing: border-box;
+          background-color: #fff8e1;
       }
+
   </style>
 </head>
 <body>
 
 <div class="container">
   <h1><%= @eventTitle %></h1>
-  <a href="/questions" class="button">Start</a>
-  <a href="/learn-event" class="button"> Learn</a>
-  <%if @admin%>
-    <a href="/add-questions" class="button2"> Add Questions</a>
-  <% end %>
-
+  <form action="/add-questions"  method="post">
+  <label for="question">New Question:</label>
+  <input type="text" id="question" name="question" value="¿ ?"required><br><br>
+  <label for="correct_answer">Correct Answer:</label>
+  <input type="text" id="correct_answer" name="correct_answer" required><br><br>
+  <label for="incorrect_answer1">Incorrect Answer:</label>
+  <input type="text" id="incorrect_answer1" name="incorrect_answer1" required><br><br>
+  <label for="incorrect-answer-2">Incorrect Answer:</label>
+  <input type="text" id="incorrect_answer2" name="incorrect_answer2" required><br><br>
+  <label for="incorrect_answer3">Incorrect Answer:</label>
+  <input type="text" id="incorrect_answer3" name="incorrect_answer3" required><br><br>
+  <input type="submit" class="button" value="Add">
+  </form>
   <a href="/events" class="button">Back</a>
-
 </div>
-
+<script>
+    document.getElementById('button').addEventListener('click', function() {
+        history.back();
+    });
+</script>
 </body>
 </html>
 
