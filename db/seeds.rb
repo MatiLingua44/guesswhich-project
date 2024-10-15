@@ -589,5 +589,3 @@ answers = Answer.create!([
                            { description: 'Bulgaria', question: questions[96], is_correct: false },
                            { description: 'Rumania', question: questions[96], is_correct: false }
                          ])
-
-User.create(names: "admin" , username: "admin" , email: "admin@gmail.com" , password: "admin", is_admin: true)
