@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -10,38 +12,38 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_06_17_154641) do
-  create_table "answers", force: :cascade do |t|
-    t.string "description"
-    t.boolean "is_correct"
-    t.integer "question_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["question_id"], name: "index_answers_on_question_id"
+ActiveRecord::Schema[7.1].define(version: 20_240_617_154_641) do
+  create_table 'answers', force: :cascade do |t|
+    t.string 'description'
+    t.boolean 'is_correct'
+    t.integer 'question_id', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['question_id'], name: 'index_answers_on_question_id'
   end
 
-  create_table "questions", force: :cascade do |t|
-    t.string "description"
-    t.integer "event"
-    t.integer "correct_answered", default: 0
-    t.integer "incorrect_answered", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+  create_table 'questions', force: :cascade do |t|
+    t.string 'description'
+    t.integer 'event'
+    t.integer 'correct_answered', default: 0
+    t.integer 'incorrect_answered', default: 0
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
   end
 
-  create_table "users", force: :cascade do |t|
-    t.string "names"
-    t.string "username"
-    t.string "email"
-    t.string "password"
-    t.integer "score"
-    t.string "password_digest"
-    t.boolean "is_admin", default: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string "password_reset_token"
-    t.datetime "password_reset_sent_at"
+  create_table 'users', force: :cascade do |t|
+    t.string 'names'
+    t.string 'username'
+    t.string 'email'
+    t.string 'password'
+    t.integer 'score'
+    t.string 'password_digest'
+    t.boolean 'is_admin', default: false
+    t.datetime 'created_at'
+    t.datetime 'updated_at'
+    t.string 'password_reset_token'
+    t.datetime 'password_reset_sent_at'
   end
 
-  add_foreign_key "answers", "questions"
+  add_foreign_key 'answers', 'questions'
 end

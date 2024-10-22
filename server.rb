@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sinatra/base'
 require 'sinatra/activerecord'
 require 'sqlite3'
@@ -9,446 +11,434 @@ require './models/question'
 require './models/answer'
 
 class App < Sinatra::Application
-    set :database_file, './config/database.yml'
-    set :public_folder, 'public'
+  set :database_file, './config/database.yml'
+  set :public_folder, 'public'
 
-    def initialize(app = nil)
-        super()
+  def initialize(_app = nil)
+    super()
+  end
+
+  configure do
+    enable :sessions
+  end
+
+  processed_questions = []
+
+  get '/' do
+    session.clear
+    erb :home
+  end
+
+  get '/menu' do
+    @username = session[:username]
+    user = User.find_by(username: session[:username])
+    @admin = user.is_admin
+    erb :menu
+  end
+
+  # Shows the ranking
+  get '/ranking' do
+    @users = User.all.order('score DESC')
+    erb :'/ranking'
+  end
+
+  # Shows the question statistics
+  get '/question-statistics' do
+    @correct_questions = Question.all.order('correct_answered DESC')
+    @incorrect_questions = Question.all.order('incorrect_answered DESC')
+    erb :'/question-statistics'
+  end
+
+  # Shows the login page
+  get '/login' do
+    erb :login
+  end
+
+  # Shows the sign in page
+  get '/register' do
+    erb :register
+  end
+
+  # Show the failed page when the player looses
+  get '/failed' do
+    @error = session[:error]
+    @redirect = session[:redirect]
+    erb :failed
+  end
+
+  # Shows the information about the selected event
+  get '/learn-event' do
+    selected_event = session[:selected_event]
+    event_learn = {
+      '0' => 'util/second-world-war.pdf',
+      '1' => 'util/industrial-revolution.pdf',
+      '2' => 'util/french-revolution.pdf',
+      '3' => 'util/11-9-terrorist-attack.pdf',
+      '4' => 'util/apollo-11.pdf',
+      '5' => 'util/first-world-war.pdf'
+    }
+    @event = event_learn[selected_event]
+    erb :'learn-event'
+  end
+
+  # Manages the events
+  get '/events' do
+    erb :events
+  end
+
+  # Route used when the game finishes
+  get '/finish' do
+    @secondChanceStreak = session[:secondChanceStreak]
+    @title = session[:title]
+    erb :finish
+  end
+
+  # Manages the login request
+  post '/login' do
+    username = params[:username]
+    password = params[:password]
+
+    existing_user = User.find_by(username: username)
+
+    if existing_user&.authenticate(password)
+      session[:username] = params[:username]
+      redirect '/menu'
+    else
+      session[:error] = 'Invalid credentials'
+      session[:redirect] = '/login'
+      redirect '/failed'
+    end
+  end
+
+  # Manages the sign up request
+  post '/register' do
+    username = params[:username]
+    password = params[:password]
+    confirm_password = params[:confirm_password]
+    email = params[:email]
+    names = params[:names]
+
+    session[:redirect] = '/register'
+
+    existing_user = User.find_by(username: username)
+    if existing_user
+      session[:error] = 'The username is already being used. Please use a different one'
+      redirect '/failed'
     end
 
-    configure do
-        enable :sessions
+    existing_email = User.find_by(email: email)
+    if existing_email
+      session[:error] = 'The email is already being used. Please use a different one'
+      redirect '/failed'
     end
 
-    processed_questions = []
-
-    get '/' do
-        session.clear
-        erb :home
+    if password != confirm_password
+      session[:error] = 'Passwords do not match'
+      redirect '/failed'
     end
 
-    get '/menu' do
-        @username = session[:username]
-        user = User.find_by(username: session[:username])
-        @admin = user.is_admin
-        erb :menu
+    # Insert the new user into the database
+    User.create(names: names, username: username, email: email, password: password)
+
+    # Redirect to homepage after succesfully sign up
+    redirect '/login'
+  end
+
+  # Shows all the events available for playing
+  post '/events' do
+    event = params[:event]
+    session[:selected_event] = event
+    session[:user_score] = 0
+    processed_questions.clear
+    session[:question_count] = 0
+    session[:extraTimeStreak] = false
+    session[:skipQuestionStreak] = false
+    session[:secondChanceStreak] = false
+    session[:count] = 0
+    event_titles = {
+      '0' => 'Second World War',
+      '1' => 'Industrial Revolution',
+      '2' => 'French Revolution',
+      '3' => '11/9 Terrorist Attack',
+      '4' => 'Apollo 11',
+      '5' => 'First World War'
+    }
+    @eventTitle = event_titles[event]
+    user = User.find_by(username: session[:username])
+    @admin = user.is_admin
+    erb :'show-event'
+  end
+
+  # Shows the questions with their answers
+  get '/questions' do
+    selected_event = session[:selected_event]
+    @score = session[:user_score] ||= 0
+    @extraTimeStreak = session[:extraTimeStreak] ||= false
+    @skipQuestionStreak = session[:skipQuestionStreak] ||= false
+    @secondChanceStreak = session[:secondChanceStreak] ||= false
+
+    @questions = Question.where(event: selected_event.to_i)
+                         .where.not(description: processed_questions)
+                         .order('RANDOM()').first
+
+    if @questions.nil?
+      session[:title] = if session[:question_count] == 15
+                          'Congratulations, You won!'
+                        else
+                          'You answered all the questions.'
+                        end
+      redirect '/finish'
+    else
+      session[:title] = 'You ran out of time!'
+      processed_questions << @questions.description
+      @answers = @questions.answers.all
+      @correct_answer_id = @answers.find_by(is_correct: true).id
+      erb :'questions/show'
     end
+  end
 
-    # Shows the ranking
-    get '/ranking' do
-        @users = User.all.order('score DESC')
-        erb :'/ranking'
-    end
+  post '/questions' do
+    if session[:username]
+      user = User.find_by(username: session[:username])
+      existing_answer = Answer.find_by(id: params['answer'])
 
-    # Shows the question statistics
-    get '/question-statistics' do
-        @correct_questions = Question.all.order('correct_answered DESC')
-        @incorrect_questions = Question.all.order('incorrect_answered DESC')
-        erb :'/question-statistics'
-    end
+      @question = Question.find_by(id: existing_answer.question)
 
-    # Shows the login page
-    get '/login' do
-        erb :login
-    end
-
-    # Shows the sign in page
-    get '/register' do
-        erb :register
-    end
-
-    # Show the failed page when the player looses
-    get '/failed' do
-        @error = session[:error]
-        @redirect = session[:redirect]
-        erb :failed
-    end
-
-    # Shows the information about the selected event
-    get '/learn-event' do
-        selected_event = session[:selected_event]
-        event_learn = {
-          '0' => "util/second-world-war.pdf",
-          '1' => "util/industrial-revolution.pdf",
-          '2' => "util/french-revolution.pdf",
-          '3' => "util/11-9-terrorist-attack.pdf",
-          '4' => "util/apollo-11.pdf",
-          '5' => "util/first-world-war.pdf"
-        }
-        @event = event_learn[selected_event]
-        erb :'learn-event'
-    end
-
-    # Manages the events
-    get '/events' do
-        erb :events
-    end
-
-    # Route used when the game finishes
-    get '/finish' do
-        @secondChanceStreak = session[:secondChanceStreak] 
-        @title = session[:title]
-        erb :finish
-    end
-
-    # Manages the login request
-    post '/login' do
-        username = params[:username]
-        password = params[:password]
-
-        existing_user = User.find_by(username: username)
-
-        if existing_user && existing_user.authenticate(password)
-            session[:username] = params[:username]
-            redirect '/menu'
-        else
-            session[:error] = "Invalid credentials"
-            session[:redirect] = "/login"
-            redirect '/failed'
-        end
-    end
-
-    # Manages the sign up request
-    post '/register' do
-        username = params[:username]
-        password = params[:password]
-        confirm_password = params[:confirm_password]
-        email = params[:email]
-        names = params[:names]
-
-        session[:redirect] = "/register"
-
-        existing_user = User.find_by(username: username)
-        if existing_user
-            session[:error] = "The username is already being used. Please use a different one"
-            redirect '/failed'
-        end
-
-        existing_email = User.find_by(email: email)
-        if existing_email
-            session[:error] = "The email is already being used. Please use a different one"
-            redirect '/failed'
-        end
-
-        if password != confirm_password
-            session[:error] = "Passwords do not match"
-            redirect '/failed'
-        end
-
-        # Insert the new user into the database
-        User.create(names: names, username: username, email: email, password: password)
-
-        # Redirect to homepage after succesfully sign up
-        redirect '/login'
-    end
-
-    # Shows all the events available for playing
-    post '/events' do
-        event = params[:event]
-        session[:selected_event] = event
-        session[:user_score] = 0
-        processed_questions.clear
-        session[:question_count] = 0
-        session[:extraTimeStreak] = false
-        session[:skipQuestionStreak] = false
-        session[:secondChanceStreak] = false
-        session[:count] = 0
-        event_titles = {
-          '0' => "Second World War",
-          '1' => "Industrial Revolution",
-          '2' => "French Revolution",
-          '3' => "11/9 Terrorist Attack",
-          '4' => "Apollo 11",
-          '5' => "First World War"
-        }
-        @eventTitle = event_titles[event]
-        user = User.find_by(username: session[:username])
-        @admin = user.is_admin
-        erb :'show-event'
-    end
-
-    # Shows the questions with their answers
-    get '/questions' do
-        selected_event = session[:selected_event]
-        @score = session[:user_score] ||= 0
-        @extraTimeStreak = session[:extraTimeStreak] ||= false
-        @skipQuestionStreak = session[:skipQuestionStreak] ||= false
-        @secondChanceStreak = session[:secondChanceStreak] ||= false
-
-        @questions = Question.where(event: selected_event.to_i)
-                             .where.not(description: processed_questions)
-                             .order("RANDOM()").first
-
-        if @questions.nil?
-            if session[:question_count] == 15
-                session[:title] = "Congratulations, You won!"
-                redirect '/finish'
-            else
-                session[:title] = "You answered all the questions."
-                redirect '/finish'
-            end
-        else
-            session[:title] = "You ran out of time!"
-            processed_questions << @questions.description
-            @answers = @questions.answers.all
-            @correct_answer_id = @answers.find_by(is_correct: true).id
-            erb :'questions/show'
-        end
-    end
-
-    post '/questions' do
-        if session[:username]
-            user = User.find_by(username: session[:username])
-            existing_answer = Answer.find_by(id: params["answer"])
-
-            @question = Question.find_by(id: existing_answer.question)
-
-            if existing_answer&.is_correct
-                session[:question_count] ||= 0
-                session[:question_count] += 1
-
-                session[:user_score] ||= 0
-                session[:user_score] += 10
-                @score = session[:user_score]
-
-                session[:count] ||= 0
-                session[:count] += 1
-                @count = session[:count]
-
-                if @count == 3
-                    session[:extraTimeStreak] = true
-                end
-                if @count == 5
-                    session[:skipQuestionStreak] = true
-                end
-                if @count == 8
-                    session[:secondChanceStreak] = true
-                end
-                @extraTimeStreak = session[:extraTimeStreak]
-                @skipQuestionStreak = session[:skipQuestionStreak]
-                @secondChanceStreak = session[:secondChanceStreak]
-
-                if user.score < session[:user_score]
-                    user.update(score: session[:user_score])
-                end
-
-                if session[:question_count] == 15
-                    session[:title] = "Congratulations, You won!"
-                    redirect '/finish'
-                end
-
-                @question.update(correct_answered: @question.correct_answered + 1)
-                erb :'questions/game-stats'
-
-            elsif !existing_answer.is_correct
-                user.update(score: user.score - 5)
-                @question.update(incorrect_answered: @question.incorrect_answered + 1)
-                if user.score < 0
-                    user.update(score: 0)
-                end
-                @score = session[:user_score]
-                session[:title] = "Your answer is not correct, you lost!"
-                redirect '/finish'
-            end
-        end
-    end
-
-    get '/add-questions' do
-        erb :'questions/add-questions'
-    end
-    post '/add-questions' do
-       question = params[:question]
-       correct_answer = params[:correct_answer]
-       incorrect_answer1 = params[:incorrect_answer1]
-       incorrect_answer2 = params[:incorrect_answer2]
-       incorrect_answer3 = params[:incorrect_answer3]
-       event = session[:selected_event]
-       existing_question = Question.find_by(description: question)
-       if existing_question
-            @result = session[:result] = "The question is already in the database. Please insert a different one"
-            
-       else
-            question = Question.create(description: question, event: event)
-            
-            Answer.create(description: correct_answer , question: question , is_correct: true)
-            Answer.create(description: incorrect_answer1 ,question: question , is_correct: false)
-            Answer.create(description: incorrect_answer2 ,question: question , is_correct: false)
-            Answer.create(description: incorrect_answer3 ,question: question , is_correct: false)
-            @result = session[:result] = "Question added successfully"
-       end     
-       erb :'questions/question_status'
-    end
-
-    get '/extraTimeStreak' do
-        session[:extraTimeStreak] = false
-
-        status 204
-    end
-
-    get '/skipQuestionStreak' do
+      if existing_answer&.is_correct
         session[:question_count] ||= 0
         session[:question_count] += 1
 
-        session[:skipQuestionStreak] = false
-        redirect '/questions'
-    end
+        session[:user_score] ||= 0
+        session[:user_score] += 10
+        @score = session[:user_score]
 
-    get '/secondChanceStreak' do
-        session[:question_count] ||= 0
-        session[:question_count] += 1
-        session[:user_score] -= 5
-        
-        session[:secondChanceStreak] = false
-        redirect '/questions' 
-    end
+        session[:count] ||= 0
+        session[:count] += 1
+        @count = session[:count]
 
-    Mail.defaults do
-        delivery_method :smtp, {
-          address: 'smtp.gmail.com',
-          port: 587,
-          user_name: 'guesswhichh@gmail.com',
-          password: 'djzy qznf ixjg yfrn',
-          authentication: 'plain',
-          enable_starttls_auto: true
-        }
-    end
+        session[:extraTimeStreak] = true if @count == 3
+        session[:skipQuestionStreak] = true if @count == 5
+        session[:secondChanceStreak] = true if @count == 8
+        @extraTimeStreak = session[:extraTimeStreak]
+        @skipQuestionStreak = session[:skipQuestionStreak]
+        @secondChanceStreak = session[:secondChanceStreak]
 
-    post '/password_resets' do
-        user = User.find_by(email: params[:email])
-        if user
-            user.generate_password_reset_token!
-            mail = Mail.new do
-                from    'guesswhichh@gmail.com'
-                to      user.email
-                subject 'Password Reset'
-                body    "To reset your password, click the link below:\n\n" +
-                          "http://localhost:4567/password_resets/#{user.password_reset_token}/edit"
-            end
+        user.update(score: session[:user_score]) if user.score < session[:user_score]
 
-            mail.deliver!
-            session[:notice] = "A password reset email has been sent to your email address"
-            redirect '/password_resets/notice'
-        else
-            session[:notice] = "This email address is not registered"
-            redirect '/password_resets/notice'
-        end
-    end
-
-    get '/password_resets/:token/edit' do
-        @user = User.find_by(password_reset_token: params[:token])
-        if @user && @user.password_reset_sent_at > 2.hours.ago
-            erb :'password_resets/edit'
-        else
-            session[:notice] = "The token has expired, please try again"
-            redirect '/password_resets/notice'
-        end
-    end
-
-    get '/password_resets/new' do
-        erb :'password_resets/new'
-    end
-
-    get '/password_resets/notice' do
-        @notice = session[:notice]
-        erb :'password_resets/notice'
-    end
-
-    patch '/password_resets/:token' do
-        token = params[:token]
-
-        @user = User.find_by(password_reset_token: token)
-
-        if @user && @user.password_reset_sent_at > 2.hours.ago
-            if @user.update(password: params[:password])
-                @user.update(password_reset_token: nil, password_reset_sent_at: nil)
-                session[:notice] = "The password has been successfully reset"
-                redirect '/password_resets/notice'
-            end
-        else
-            session[:notice] = "This email address is not registered"
-            redirect '/password_resets/notice'
-        end
-    end
-
-    # Shows the user information
-    get '/user' do
-        @user = User.find_by(username: session[:username])
-        erb :'users/info'
-    end
-
-    # Shows user edit window
-    get '/edit-profile' do
-        erb :'users/edit-profile'
-    end
-
-    # Profile modification
-    post '/profile-modification' do
-        user_name = params[:username]
-        e_mail    = params[:email]
-
-        session[:redirect] = "/edit-profile"
-
-        if user_name
-
-            if User.find_by(username: user_name)
-                session[:error] = "The username is already being used. Please use a different one"
-                redirect '/failed'
-            else
-                User.find_by(username: session[:username]).update(username: user_name)
-                session[:username] = user_name
-                redirect '/edit-profile'
-            end
-            
+        if session[:question_count] == 15
+          session[:title] = 'Congratulations, You won!'
+          redirect '/finish'
         end
 
-        if e_mail
-            
-            if User.find_by(email: e_mail)
-                session[:error] = "The email is already being used. Please use a different one"
-                redirect '/failed'
-            else
-                User.find_by(username: session[:username]).update(email: e_mail)
-                redirect '/edit-profile'
-            end
+        @question.update(correct_answered: @question.correct_answered + 1)
+        erb :'questions/game-stats'
 
-        end
-        
+      elsif !existing_answer.is_correct
+        user.update(score: user.score - 5)
+        @question.update(incorrect_answered: @question.incorrect_answered + 1)
+        user.update(score: 0) if user.score.negative?
+        @score = session[:user_score]
+        session[:title] = 'Your answer is not correct, you lost!'
+        redirect '/finish'
+      end
+    end
+  end
+
+  get '/add-questions' do
+    erb :'questions/add-questions'
+  end
+  post '/add-questions' do
+    question = params[:question]
+    correct_answer = params[:correct_answer]
+    incorrect_answer1 = params[:incorrect_answer1]
+    incorrect_answer2 = params[:incorrect_answer2]
+    incorrect_answer3 = params[:incorrect_answer3]
+    event = session[:selected_event]
+    existing_question = Question.find_by(description: question)
+    if existing_question
+      @result = session[:result] = 'The question is already in the database. Please insert a different one'
+
+    else
+      question = Question.create(description: question, event: event)
+
+      Answer.create(description: correct_answer, question: question, is_correct: true)
+      Answer.create(description: incorrect_answer1, question: question, is_correct: false)
+      Answer.create(description: incorrect_answer2, question: question, is_correct: false)
+      Answer.create(description: incorrect_answer3, question: question, is_correct: false)
+      @result = session[:result] = 'Question added successfully'
+    end
+    erb :'questions/question_status'
+  end
+
+  get '/extraTimeStreak' do
+    session[:extraTimeStreak] = false
+
+    status 204
+  end
+
+  get '/skipQuestionStreak' do
+    session[:question_count] ||= 0
+    session[:question_count] += 1
+
+    session[:skipQuestionStreak] = false
+    redirect '/questions'
+  end
+
+  get '/secondChanceStreak' do
+    session[:question_count] ||= 0
+    session[:question_count] += 1
+    session[:user_score] -= 5
+
+    session[:secondChanceStreak] = false
+    redirect '/questions'
+  end
+
+  Mail.defaults do
+    delivery_method :smtp, {
+      address: 'smtp.gmail.com',
+      port: 587,
+      user_name: 'guesswhichh@gmail.com',
+      password: 'djzy qznf ixjg yfrn',
+      authentication: 'plain',
+      enable_starttls_auto: true
+    }
+  end
+
+  post '/password_resets' do
+    user = User.find_by(email: params[:email])
+    if user
+      user.generate_password_reset_token!
+      mail = Mail.new do
+        from 'guesswhichh@gmail.com'
+        to      user.email
+        subject 'Password Reset'
+        body    "To reset your password, click the link below:\n\n" \
+                "http://localhost:4567/password_resets/#{user.password_reset_token}/edit"
+      end
+
+      mail.deliver!
+      session[:notice] = 'A password reset email has been sent to your email address'
+    else
+      session[:notice] = 'This email address is not registered'
+    end
+    redirect '/password_resets/notice'
+  end
+
+  get '/password_resets/:token/edit' do
+    @user = User.find_by(password_reset_token: params[:token])
+    if @user && @user.password_reset_sent_at > 2.hours.ago
+      erb :'password_resets/edit'
+    else
+      session[:notice] = 'The token has expired, please try again'
+      redirect '/password_resets/notice'
+    end
+  end
+
+  get '/password_resets/new' do
+    erb :'password_resets/new'
+  end
+
+  get '/password_resets/notice' do
+    @notice = session[:notice]
+    erb :'password_resets/notice'
+  end
+
+  patch '/password_resets/:token' do
+    token = params[:token]
+
+    @user = User.find_by(password_reset_token: token)
+
+    if @user && @user.password_reset_sent_at > 2.hours.ago
+      if @user.update(password: params[:password])
+        @user.update(password_reset_token: nil, password_reset_sent_at: nil)
+        session[:notice] = 'The password has been successfully reset'
+        redirect '/password_resets/notice'
+      end
+    else
+      session[:notice] = 'This email address is not registered'
+      redirect '/password_resets/notice'
+    end
+  end
+
+  # Shows the user information
+  get '/user' do
+    @user = User.find_by(username: session[:username])
+    erb :'users/info'
+  end
+
+  # Shows user edit window
+  get '/edit-profile' do
+    erb :'users/edit-profile'
+  end
+
+  # Profile modification
+  post '/profile-modification' do
+    user_name = params[:username]
+    e_mail    = params[:email]
+
+    session[:redirect] = '/edit-profile'
+
+    if user_name
+
+      if User.find_by(username: user_name)
+        session[:error] = 'The username is already being used. Please use a different one'
+        redirect '/failed'
+      else
+        User.find_by(username: session[:username]).update(username: user_name)
+        session[:username] = user_name
+        redirect '/edit-profile'
+      end
+
     end
 
-    # Route for score reset
-    post '/user/reset-score' do
-        if session[:username]
-            user = User.find_by(username: session[:username])
-            user.update(score: 0)
-            redirect '/edit-profile'
-        end
+    if e_mail
+
+      if User.find_by(email: e_mail)
+        session[:error] = 'The email is already being used. Please use a different one'
+        redirect '/failed'
+      else
+        User.find_by(username: session[:username]).update(email: e_mail)
+        redirect '/edit-profile'
+      end
+
     end
+  end
 
-    # Route for deleting a user
-    post '/user/delete' do
-        if session[:username]
-            user = User.find_by(username: session[:username])
-            user.destroy
-            session.clear
-            session[:notice] = "The user has been successfully deleted"
-            redirect '/password_resets/notice'
-        end
+  # Route for score reset
+  post '/user/reset-score' do
+    if session[:username]
+      user = User.find_by(username: session[:username])
+      user.update(score: 0)
+      redirect '/edit-profile'
     end
+  end
 
-    # Restricts paths not allowed to get if not logged in
-    before do
-        public_paths = %w[/login /register / /failed /password_resets/new /password_resets /password_resets/notice]
-
-        public_path_patterns = [
-          %r{^/password_resets/\w{22}/edit$},
-          %r{^/password_resets/\w{22}$}
-        ]
-
-        if public_paths.include?(request.path_info) || public_path_patterns.any? { |pattern| request.path_info.match(pattern) }
-            pass
-        else
-            redirect '/login' unless session[:username]
-        end
+  # Route for deleting a user
+  post '/user/delete' do
+    if session[:username]
+      user = User.find_by(username: session[:username])
+      user.destroy
+      session.clear
+      session[:notice] = 'The user has been successfully deleted'
+      redirect '/password_resets/notice'
     end
+  end
 
+  # Restricts paths not allowed to get if not logged in
+  before do
+    public_paths = %w[/login /register / /failed /password_resets/new /password_resets /password_resets/notice]
+
+    public_path_patterns = [
+      %r{^/password_resets/\w{22}/edit$},
+      %r{^/password_resets/\w{22}$}
+    ]
+
+    if public_paths.include?(request.path_info) || public_path_patterns.any? do |pattern|
+      request.path_info.match(pattern)
+    end
+      pass
+    else
+      redirect '/login' unless session[:username]
+    end
+  end
 end

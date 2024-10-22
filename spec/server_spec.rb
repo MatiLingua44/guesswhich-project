@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 ENV['APP_ENV'] = 'test'
 
 require 'simplecov'
 SimpleCov.start
 
-require_relative '../server.rb'
+require_relative '../server'
 require_relative '../models/user'
 require 'rspec'
 require 'rack/test'
@@ -27,8 +29,8 @@ RSpec.describe 'Server' do
     )
   end
 
-  it 'redirects to the page of password resets 'do
-    get '/password_resets/new' 
+  it 'redirects to the page of password resets ' do
+    get '/password_resets/new'
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/password_resets/new')
   end
@@ -40,7 +42,7 @@ RSpec.describe 'Server' do
   end
 
   it 'redirects to the user information when authenticated' do
-    post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'}
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
     follow_redirect!
 
     expect(last_response.status).to eq(200)
@@ -53,10 +55,10 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('testuser@example.com')
   end
 
-  it 'redirects to the login page when not authenticated' do 
+  it 'redirects to the login page when not authenticated' do
     get '/users'
-     expect(last_response.status).to eq(302)
-     expect(last_response.headers['Location']).to include('/login')
+    expect(last_response.status).to eq(302)
+    expect(last_response.headers['Location']).to include('/login')
   end
 
   it 'shows the home page' do
@@ -66,17 +68,17 @@ RSpec.describe 'Server' do
     end
   end
 
-  it 'redirects to the page event when authenticated'do
-    post '/login' , {username: 'testuser', password: 'testuserpassword'}
+  it 'redirects to the page event when authenticated' do
+    post '/login', { username: 'testuser', password: 'testuserpassword' }
     get '/events'
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/events')
   end
 
   it 'redirects to the login page when not authenticated' do
-      get '/events' 
-      expect(last_response.status).to eq(302)
-      expect(last_response.headers['Location']).to include('/login')
+    get '/events'
+    expect(last_response.status).to eq(302)
+    expect(last_response.headers['Location']).to include('/login')
   end
 
   it 'shows the login form' do
@@ -124,7 +126,8 @@ RSpec.describe 'Server' do
   end
 
   it 'signs up with used credentials' do
-    post '/register', username: 'testuser', password: 'testuserpassword', confirm_password: 'testuserpassword', email: 'testuser@example.com', names: 'Test User'
+    post '/register', username: 'testuser', password: 'testuserpassword', confirm_password: 'testuserpassword',
+                      email: 'testuser@example.com', names: 'Test User'
     expect(last_response.status).to eq(302)
     follow_redirect!
     expect(last_request.path).to eq('/failed')
@@ -132,14 +135,16 @@ RSpec.describe 'Server' do
   end
 
   it 'signs up with available credentials' do
-    post '/register', username: 'testuserOk', password: 'testuserpasswordOk', confirm_password: 'testuserpasswordOk', email: 'testuserOk@example.com', names: 'Test User'
+    post '/register', username: 'testuserOk', password: 'testuserpasswordOk', confirm_password: 'testuserpasswordOk',
+                      email: 'testuserOk@example.com', names: 'Test User'
     expect(last_response.status).to eq(302)
     follow_redirect!
     expect(last_request.path).to eq('/login')
   end
 
   it 'signs up with mismatched passwords' do
-    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2', email: 'testuserNew@example.com', names: 'Test User New'
+    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2',
+                      email: 'testuserNew@example.com', names: 'Test User New'
     expect(last_response.status).to eq(302)
     follow_redirect!
     expect(last_request.path).to eq('/failed')
@@ -147,16 +152,16 @@ RSpec.describe 'Server' do
   end
 
   it 'fails to sign up with a used email' do
-    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2', email: 'testuser@example.com', names: 'Test User New'
+    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2',
+                      email: 'testuser@example.com', names: 'Test User New'
     expect(last_response.status).to eq(302)
     follow_redirect!
     expect(last_request.path).to eq('/failed')
     expect(last_response.body).to include('The email is already being used. Please use a different one')
   end
 
-
   it 'shows the ranking when logged in' do
-    post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'}
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
     follow_redirect!
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/menu')
@@ -166,13 +171,13 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('Ranking table')
   end
 
-  it 'disables extra time streak and responds with 204 No Content' do 
+  it 'disables extra time streak and responds with 204 No Content' do
     post '/login', {
       username: 'testuser',
       password: 'testuserpassword',
       email: 'testuser@example.com'
     }
-  
+
     session_data = {
       extraTimeStreak: true,
       username: 'testuser'
@@ -184,13 +189,13 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:extraTimeStreak]).to eq(false)
   end
 
-  it 'applies second chance streak and redirects to questions' do 
+  it 'applies second chance streak and redirects to questions' do
     post '/login', {
       username: 'testuser',
       password: 'testuserpassword',
       email: 'testuser@example.com'
     }
-    
+
     session_data = {
       secondChanceStreak: true,
       user_score: 100,
@@ -206,9 +211,7 @@ RSpec.describe 'Server' do
 
     expect(last_request.env['rack.session'][:secondChanceStreak]).to eq(false)
     expect(last_request.env['rack.session'][:user_score]).to eq(95)
-
   end
-
 
   it 'shows that the game is over because answered 14 questions and used the question skipping streak or second chance streak' do
     post '/login', {
@@ -223,7 +226,7 @@ RSpec.describe 'Server' do
       username: 'testuser'
     }
 
-    get '/skipQuestionStreak' , {}, 'rack.session' => session_data
+    get '/skipQuestionStreak', {}, 'rack.session' => session_data
     expect(last_request.path).to eq('/skipQuestionStreak')
 
     expect(last_request.env['rack.session'][:question_count]).to eq(15)
@@ -237,10 +240,9 @@ RSpec.describe 'Server' do
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/finish')
     expect(last_response.body).to include('Congratulations, You won!')
-
   end
 
-  it 'shows the question statistics page' do 
+  it 'shows the question statistics page' do
     post '/login', {
       username: 'testuser',
       password: 'testuserpassword',
@@ -254,32 +256,30 @@ RSpec.describe 'Server' do
   end
 
   it 'shows the page to add questions' do
-    post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'} 
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
     get '/add-questions'
     expect(last_response).to be_ok
   end
 
-    it 'adds question, but it is already in the database' do
-      post '/login' , {username: 'testuser', password: 'testuserpassword',email: 'testuser@example.com'} 
-      
-      get '/add-questions'
-      expect(last_response).to be_ok
+  it 'adds question, but it is already in the database' do
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
 
-      question = Question.create(description: 'Test question', event: 1)
+    get '/add-questions'
+    expect(last_response).to be_ok
 
-      post '/add-questions', 'rack.session' => {
-        question: 'Test question' ,
-        correct_answer: '1',
-        incorrect_answer1: '2',
-        incorrect_answer2: '3',
-        incorrect_answer3: '4',
-        event: 1
-      }
-      
-      expect(last_request.env['rack.session'][:result]).to eq('The question is already in the database. Please insert a different one')
+    Question.create(description: 'Test question', event: 1)
 
-    end
+    post '/add-questions', 'rack.session' => {
+      question: 'Test question',
+      correct_answer: '1',
+      incorrect_answer1: '2',
+      incorrect_answer2: '3',
+      incorrect_answer3: '4',
+      event: 1
+    }
 
+    expect(last_request.env['rack.session'][:result]).to eq('The question is already in the database. Please insert a different one')
+  end
 
   it 'shows the game finished because answered all the questions' do
     post '/login', {
@@ -301,7 +301,7 @@ RSpec.describe 'Server' do
   end
 
   it 'deletes a user' do
-    post'/login', {username: 'testuser', password: 'testuserpassword'}
+    post '/login', { username: 'testuser', password: 'testuserpassword' }
     follow_redirect!
 
     expect(last_response.status).to eq(200)
@@ -361,12 +361,12 @@ RSpec.describe 'Server' do
     follow_redirect!
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/menu')
-    
+
     get '/edit-profile'
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/edit-profile')
 
-    post'/user/reset-score', {
+    post '/user/reset-score', {
       user_score: 0
     }
     expect(last_request.path).to eq('/user/reset-score')
@@ -375,20 +375,20 @@ RSpec.describe 'Server' do
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/edit-profile')
     expect(last_response.body).to include('Reset Score')
-  end 
+  end
 
-  it 'Redirect to completion page when user answers incorrectly' do 
-    post '/login',{
+  it 'Redirect to completion page when user answers incorrectly' do
+    post '/login', {
       username: 'testuser',
       password: 'testuserpassword',
       email: 'testuser@example.com  '
-    } 
+    }
 
     follow_redirect!
     expect(last_response.status).to eq(200)
 
-    question = Question.create(description: "Test question", event: 1)
-    incorrect_answer = Answer.create(description: "Incorrect answer", is_correct: false, question: question)
+    question = Question.create(description: 'Test question', event: 1)
+    incorrect_answer = Answer.create(description: 'Incorrect answer', is_correct: false, question: question)
 
     post '/questions', { answer: incorrect_answer.id }, 'rack.session' => {
       question_count: 5,
@@ -396,26 +396,25 @@ RSpec.describe 'Server' do
       username: 'testuser'
     }
 
-    follow_redirect! 
+    follow_redirect!
 
     expect(last_request.path).to eq('/finish')
     expect(last_response.body).to include('Your answer is not correct, you lost!')
     expect(last_request.env['rack.session'][:user_score]).to eq(50)
-
   end
 
   it 'Redirect to finish page when user runs out of time' do
-    post '/login',{
+    post '/login', {
       username: 'testuser',
       password: 'testuserpassword',
       email: 'testuser@example.com  '
-    } 
+    }
 
     follow_redirect!
     expect(last_response.status).to eq(200)
 
-    question = Question.create(description: "Test question", event: 1)
-    incorrect_answer = Answer.create(description: "Incorrect answer", is_correct: false, question: question)
+    question = Question.create(description: 'Test question', event: 1)
+    incorrect_answer = Answer.create(description: 'Incorrect answer', is_correct: false, question: question)
 
     session_data = {
       user_score: 0,
@@ -423,17 +422,16 @@ RSpec.describe 'Server' do
       username: 'testuser',
       user_time: -1,
       processed_questions: [],
-      selected_event: 1 
+      selected_event: 1
     }
 
-    get '/questions',{answer: incorrect_answer, question: question}, 'rack.session' => session_data
+    get '/questions', { answer: incorrect_answer, question: question }, 'rack.session' => session_data
 
     get '/finish'
     expect(last_request.path).to eq('/finish')
     expect(last_response.body).to include('You ran out of time!')
   end
 
-    
   it 'sets extraTimeStreak to true when count is 3' do
     post '/login', {
       username: 'testuser',
@@ -443,9 +441,9 @@ RSpec.describe 'Server' do
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-   
-    question = Question.create(description: "Test question", event: 1)
-    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    question = Question.create(description: 'Test question', event: 1)
+    correct_answer = Answer.create(description: 'Correct answer', is_correct: true, question: question)
 
     post '/questions', { answer: correct_answer.id }, 'rack.session' => {
       count: 2,
@@ -471,9 +469,9 @@ RSpec.describe 'Server' do
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-   
-    question = Question.create(description: "Test question", event: 1)
-    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    question = Question.create(description: 'Test question', event: 1)
+    correct_answer = Answer.create(description: 'Correct answer', is_correct: true, question: question)
 
     post '/questions', { answer: correct_answer.id }, 'rack.session' => {
       count: 4,
@@ -499,9 +497,9 @@ RSpec.describe 'Server' do
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-   
-    question = Question.create(description: "Test question", event: 1)
-    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+
+    question = Question.create(description: 'Test question', event: 1)
+    correct_answer = Answer.create(description: 'Correct answer', is_correct: true, question: question)
 
     post '/questions', { answer: correct_answer.id }, 'rack.session' => {
       count: 7,
@@ -528,15 +526,14 @@ RSpec.describe 'Server' do
     follow_redirect!
     expect(last_response.status).to eq(200)
 
-    question = Question.create(description: "Test question", event: 1)
-    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+    question = Question.create(description: 'Test question', event: 1)
+    correct_answer = Answer.create(description: 'Correct answer', is_correct: true, question: question)
 
     post '/questions', { answer: correct_answer.id }, 'rack.session' => {
       question_count: 5,
       user_score: 50,
       username: 'testuser'
     }
-
 
     expect(last_response).to be_ok
 
@@ -556,8 +553,8 @@ RSpec.describe 'Server' do
     follow_redirect!
     expect(last_response.status).to eq(200)
 
-    question = Question.create(description: "Test question", event: 1)
-    correct_answer = Answer.create(description: "Correct answer", is_correct: true, question: question)
+    question = Question.create(description: 'Test question', event: 1)
+    correct_answer = Answer.create(description: 'Correct answer', is_correct: true, question: question)
 
     session_data = {
       question_count: 14,
@@ -576,14 +573,13 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:user_score]).to eq(150)
   end
 
-
   it 'choose an event and read its material.' do
     post '/login',
-    {
-      username: 'testuser',
-      password: 'testuserpassword',
-      mail: 'testuser@example.com'
-    }
+         {
+           username: 'testuser',
+           password: 'testuserpassword',
+           mail: 'testuser@example.com'
+         }
     follow_redirect!
     expect(last_response.status).to eq(200)
 
@@ -594,8 +590,8 @@ RSpec.describe 'Server' do
       processed_questions: [],
       selected_event: 1
     }
-    
-    post'/events',{},'rack.session' => session_data
+
+    post '/events', {}, 'rack.session' => session_data
     expect(last_response.status).to eq(200)
     expect(last_response.body).to include('Star')
     expect(last_response.body).to include('Learn')
@@ -609,9 +605,9 @@ RSpec.describe 'Server' do
 
   it 'password resets with created user' do
     post '/register', {
-      username: 'testuser2', 
-      password: 'testuserpassword2', 
-      confirm_password: 'testuserpassword2', 
+      username: 'testuser2',
+      password: 'testuserpassword2',
+      confirm_password: 'testuserpassword2',
       email: 'testuser2@example.com',
       names: 'Test User'
     }
@@ -632,11 +628,10 @@ RSpec.describe 'Server' do
     expect(last_request.path).to eq('/password_resets/notice')
     expect(last_response.body).to include('A password reset email has been sent to your email address')
     expect(last_response.body).to include('Back To Login')
-
-  end 
+  end
 
   it 'password resets with non-existent user' do
-    post '/password_resets' ,{
+    post '/password_resets', {
       username: 'testuser2',
       password: 'testuserpassword2',
       email: 'testuser2@example.com'
@@ -733,7 +728,7 @@ RSpec.describe 'Server' do
     }
     follow_redirect!
     expect(last_response.status).to eq(200)
-    patch "/password_resets/invalidtoken", { password: 'newpassword' }
+    patch '/password_resets/invalidtoken', { password: 'newpassword' }
 
     expect(last_response).to be_redirect
     follow_redirect!
