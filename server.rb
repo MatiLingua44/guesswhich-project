@@ -10,6 +10,17 @@ require './models/user'
 require './models/question'
 require './models/answer'
 
+# App: Main application class
+#
+# Esta clase es el punto de entrada principal para la aplicación.
+# Gestiona la configuración general, inicializa las rutas, y controla el flujo
+# de solicitudes y respuestas de la aplicación.
+#
+# Responsabilidades:
+# - Configurar las dependencias necesarias para la aplicación.
+# - Definir las rutas y controlar el manejo de solicitudes HTTP.
+# - Iniciar cualquier configuración global, como la conexión a la base de datos o la carga de variables de entorno.
+# - Ejecutar middleware o configurar autenticación, si es necesario.
 class App < Sinatra::Application
   set :database_file, './config/database.yml'
   set :public_folder, 'public'
@@ -88,7 +99,7 @@ class App < Sinatra::Application
 
   # Route used when the game finishes
   get '/finish' do
-    @secondChanceStreak = session[:secondChanceStreak]
+    @second_chance_streak = session[:secondChanceStreak]
     @title = session[:title]
     erb :finish
   end
@@ -163,7 +174,7 @@ class App < Sinatra::Application
       '4' => 'Apollo 11',
       '5' => 'First World War'
     }
-    @eventTitle = event_titles[event]
+    @event_title = event_titles[event]
     user = User.find_by(username: session[:username])
     @admin = user.is_admin
     erb :'show-event'
@@ -173,9 +184,9 @@ class App < Sinatra::Application
   get '/questions' do
     selected_event = session[:selected_event]
     @score = session[:user_score] ||= 0
-    @extraTimeStreak = session[:extraTimeStreak] ||= false
-    @skipQuestionStreak = session[:skipQuestionStreak] ||= false
-    @secondChanceStreak = session[:secondChanceStreak] ||= false
+    @extra_time_streak = session[:extraTimeStreak] ||= false
+    @skip_question_streak = session[:skipQuestionStreak] ||= false
+    @second_chance_streak = session[:secondChanceStreak] ||= false
 
     @questions = Question.where(event: selected_event.to_i)
                          .where.not(description: processed_questions)
@@ -201,47 +212,70 @@ class App < Sinatra::Application
     if session[:username]
       user = User.find_by(username: session[:username])
       existing_answer = Answer.find_by(id: params['answer'])
-
       @question = Question.find_by(id: existing_answer.question)
 
       if existing_answer&.is_correct
-        session[:question_count] ||= 0
-        session[:question_count] += 1
-
-        session[:user_score] ||= 0
-        session[:user_score] += 10
-        @score = session[:user_score]
-
-        session[:count] ||= 0
-        session[:count] += 1
-        @count = session[:count]
-
-        session[:extraTimeStreak] = true if @count == 3
-        session[:skipQuestionStreak] = true if @count == 5
-        session[:secondChanceStreak] = true if @count == 8
-        @extraTimeStreak = session[:extraTimeStreak]
-        @skipQuestionStreak = session[:skipQuestionStreak]
-        @secondChanceStreak = session[:secondChanceStreak]
-
-        user.update(score: session[:user_score]) if user.score < session[:user_score]
-
-        if session[:question_count] == 15
-          session[:title] = 'Congratulations, You won!'
-          redirect '/finish'
-        end
-
-        @question.update(correct_answered: @question.correct_answered + 1)
-        erb :'questions/game-stats'
-
-      elsif !existing_answer.is_correct
-        user.update(score: user.score - 5)
-        @question.update(incorrect_answered: @question.incorrect_answered + 1)
-        user.update(score: 0) if user.score.negative?
-        @score = session[:user_score]
-        session[:title] = 'Your answer is not correct, you lost!'
-        redirect '/finish'
+        handle_correct_answer(user)
+      else
+        handle_incorrect_answer(user)
       end
     end
+  end
+
+  private
+
+  def handle_correct_answer(user)
+    increment_session_counters
+    update_streak_flags
+    update_user_score(user)
+
+    if session[:question_count] == 15
+      session[:title] = 'Congratulations, You won!'
+      redirect '/finish'
+    else
+      @question.update(correct_answered: @question.correct_answered + 1)
+      erb :'questions/game-stats'
+    end
+  end
+
+  def handle_incorrect_answer(user)
+    user.update(score: user.score - 5)
+    @question.update(incorrect_answered: @question.incorrect_answered + 1)
+    user.update(score: 0) if user.score.negative?
+    session[:title] = 'Your answer is not correct, you lost!'
+    redirect '/finish'
+  end
+
+  def increment_session_counters
+    session[:question_count] = increment_counter(:question_count)
+    session[:user_score] = increment_score
+    session[:count] = increment_counter(:count)
+
+    @score = session[:user_score]
+    @count = session[:count]
+  end
+
+  def increment_counter(counter)
+    session[counter] ||= 0
+    session[counter] += 1
+  end
+
+  def increment_score
+    session[:user_score] ||= 0
+    session[:user_score] += 10
+  end
+
+  def update_streak_flags
+    session[:extraTimeStreak] = true if @count == 3
+    session[:skipQuestionStreak] = true if @count == 5
+    session[:secondChanceStreak] = true if @count == 8
+    @extra_time_streak = session[:extraTimeStreak]
+    @skip_question_streak = session[:skipQuestionStreak]
+    @second_chance_streak = session[:secondChanceStreak]
+  end
+
+  def update_user_score(user)
+    user.update(score: session[:user_score]) if user.score < session[:user_score]
   end
 
   get '/add-questions' do
