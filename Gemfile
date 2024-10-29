@@ -16,6 +16,8 @@ gem 'rack-test'
 gem 'rackup'
 gem 'rake'
 gem 'rspec'
+gem 'rubocop-rake', '>= 0', group: :development
+gem 'rubocop-rspec', '>= 0', group: :development
 gem 'simplecov', require: false
 gem 'sinatra'
 gem 'sinatra-activerecord'
