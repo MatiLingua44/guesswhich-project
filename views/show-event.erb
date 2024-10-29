@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= @eventTitle %> | Guesswhich!</title>
+  <title><%= @event_title %> | Guesswhich!</title>
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
   <style>
       body {
@@ -95,7 +95,7 @@
 <body>
 
 <div class="container">
-  <h1><%= @eventTitle %></h1>
+  <h1><%= @event_title %></h1>
   <a href="/questions" class="button">Start</a>
   <a href="/learn-event" class="button"> Learn</a>
   <%if @admin%>
