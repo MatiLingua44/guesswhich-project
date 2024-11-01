@@ -2,5 +2,5 @@
 
 # config.ru
 
-require './server'
+require './app'
 run App

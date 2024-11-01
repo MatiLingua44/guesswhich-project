@@ -9,6 +9,7 @@ require 'mail'
 require './models/user'
 require './models/question'
 require './models/answer'
+require_relative './controllers/main_controller'
 
 # App: Main application class
 #
@@ -22,8 +23,10 @@ require './models/answer'
 # - Iniciar cualquier configuración global, como la conexión a la base de datos o la carga de variables de entorno.
 # - Ejecutar middleware o configurar autenticación, si es necesario.
 class App < Sinatra::Application
+  use MainController
   set :database_file, './config/database.yml'
   set :public_folder, 'public'
+  set :views, './views'
 
   def initialize(_app = nil)
     super()
@@ -34,18 +37,6 @@ class App < Sinatra::Application
   end
 
   processed_questions = []
-
-  get '/' do
-    session.clear
-    erb :home
-  end
-
-  get '/menu' do
-    @username = session[:username]
-    user = User.find_by(username: session[:username])
-    @admin = user.is_admin
-    erb :menu
-  end
 
   # Shows the ranking
   get '/ranking' do
@@ -68,13 +59,6 @@ class App < Sinatra::Application
   # Shows the sign in page
   get '/register' do
     erb :register
-  end
-
-  # Show the failed page when the player looses
-  get '/failed' do
-    @error = session[:error]
-    @redirect = session[:redirect]
-    erb :failed
   end
 
   # Shows the information about the selected event
