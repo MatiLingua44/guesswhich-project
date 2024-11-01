@@ -12,6 +12,7 @@ require './models/answer'
 require_relative 'controllers/main_controller'
 require_relative 'controllers/users_controller'
 require_relative 'controllers/auth_controller'
+require_relative 'controllers/game_controller'
 
 # App: Main application class
 #
@@ -28,6 +29,7 @@ class App < Sinatra::Application
   use MainController
   use UsersController
   use AuthController
+  use GameController
   set :database_file, './config/database.yml'
   set :public_folder, 'public'
   set :views, './views'
@@ -40,12 +42,8 @@ class App < Sinatra::Application
     enable :sessions
   end
 
-  processed_questions = []
-
-  # Shows the ranking
-  get '/ranking' do
-    @users = User.all.order('score DESC')
-    erb :'/ranking'
+  before '/questions' do
+    session[:processed_questions] ||= []
   end
 
   # Shows the question statistics
@@ -53,58 +51,6 @@ class App < Sinatra::Application
     @correct_questions = Question.all.order('correct_answered DESC')
     @incorrect_questions = Question.all.order('incorrect_answered DESC')
     erb :'/question-statistics'
-  end
-
-  # Shows the information about the selected event
-  get '/learn-event' do
-    selected_event = session[:selected_event]
-    event_learn = {
-      '0' => 'util/second-world-war.pdf',
-      '1' => 'util/industrial-revolution.pdf',
-      '2' => 'util/french-revolution.pdf',
-      '3' => 'util/11-9-terrorist-attack.pdf',
-      '4' => 'util/apollo-11.pdf',
-      '5' => 'util/first-world-war.pdf'
-    }
-    @event = event_learn[selected_event]
-    erb :'learn-event'
-  end
-
-  # Manages the events
-  get '/events' do
-    erb :events
-  end
-
-  # Route used when the game finishes
-  get '/finish' do
-    @second_chance_streak = session[:secondChanceStreak]
-    @title = session[:title]
-    erb :finish
-  end
-
-  # Shows all the events available for playing
-  post '/events' do
-    event = params[:event]
-    session[:selected_event] = event
-    session[:user_score] = 0
-    processed_questions.clear
-    session[:question_count] = 0
-    session[:extraTimeStreak] = false
-    session[:skipQuestionStreak] = false
-    session[:secondChanceStreak] = false
-    session[:count] = 0
-    event_titles = {
-      '0' => 'Second World War',
-      '1' => 'Industrial Revolution',
-      '2' => 'French Revolution',
-      '3' => '11/9 Terrorist Attack',
-      '4' => 'Apollo 11',
-      '5' => 'First World War'
-    }
-    @event_title = event_titles[event]
-    user = User.find_by(username: session[:username])
-    @admin = user.is_admin
-    erb :'show-event'
   end
 
   # Shows the questions with their answers
@@ -116,7 +62,7 @@ class App < Sinatra::Application
     @second_chance_streak = session[:secondChanceStreak] ||= false
 
     @questions = Question.where(event: selected_event.to_i)
-                         .where.not(description: processed_questions)
+                         .where.not(description: session[:processed_questions])
                          .order('RANDOM()').first
 
     if @questions.nil?
@@ -128,7 +74,7 @@ class App < Sinatra::Application
       redirect '/finish'
     else
       session[:title] = 'You ran out of time!'
-      processed_questions << @questions.description
+      session[:processed_questions] << @questions.description
       @answers = @questions.answers.all
       @correct_answer_id = @answers.find_by(is_correct: true).id
       erb :'questions/show'
@@ -229,29 +175,6 @@ class App < Sinatra::Application
       @result = session[:result] = 'Question added successfully'
     end
     erb :'questions/question_status'
-  end
-
-  get '/extraTimeStreak' do
-    session[:extraTimeStreak] = false
-
-    status 204
-  end
-
-  get '/skipQuestionStreak' do
-    session[:question_count] ||= 0
-    session[:question_count] += 1
-
-    session[:skipQuestionStreak] = false
-    redirect '/questions'
-  end
-
-  get '/secondChanceStreak' do
-    session[:question_count] ||= 0
-    session[:question_count] += 1
-    session[:user_score] -= 5
-
-    session[:secondChanceStreak] = false
-    redirect '/questions'
   end
 
   # Restricts paths not allowed to get if not logged in
