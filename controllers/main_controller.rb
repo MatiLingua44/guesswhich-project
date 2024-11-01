@@ -5,7 +5,8 @@ require 'sinatra/activerecord'
 
 # This class is the Main Controller
 class MainController < Sinatra::Base
-  set :views, File.expand_path('../../views', __FILE__)
+  set :views, File.expand_path('../views', __dir__)
+
   get '/' do
     session.clear
     erb :home
