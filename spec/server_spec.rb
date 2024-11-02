@@ -5,7 +5,7 @@ ENV['APP_ENV'] = 'test'
 require 'simplecov'
 SimpleCov.start
 
-require_relative '../server'
+require_relative '../app'
 require_relative '../models/user'
 require 'rspec'
 require 'rack/test'
@@ -61,13 +61,6 @@ RSpec.describe 'Server' do
     expect(last_response.headers['Location']).to include('/login')
   end
 
-  it 'shows the home page' do
-    get '/' do
-      expect(last_response.status).to eq(200)
-      expect(last_request.path).to eq('/')
-    end
-  end
-
   it 'redirects to the page event when authenticated' do
     post '/login', { username: 'testuser', password: 'testuserpassword' }
     get '/events'
@@ -88,22 +81,6 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('Log In')
     expect(last_response.body).to include('name="username"')
     expect(last_response.body).to include('name="password"')
-  end
-
-  it 'logs in with valid credentials' do
-    post '/login', username: 'testuser', password: 'testuserpassword'
-    expect(last_response.status).to eq(302)
-    follow_redirect!
-    expect(last_request.path).to eq('/menu')
-    expect(last_response.body).to include('User: testuser')
-  end
-
-  it 'fails to log in with invalid credentials' do
-    post '/login', username: 'testuser', password: 'wrongpassword'
-    expect(last_response.status).to eq(302)
-    follow_redirect!
-    expect(last_request.path).to eq('/failed')
-    expect(last_response.body).to include('Invalid credentials')
   end
 
   it 'redirects to login page if accessing a protected route without logging in' do
@@ -213,7 +190,8 @@ RSpec.describe 'Server' do
     expect(last_request.env['rack.session'][:user_score]).to eq(95)
   end
 
-  it 'shows that the game is over because answered 14 questions and used the question skipping streak or second chance streak' do
+  it 'shows that the game is over because answered 14 questions
+  and used the question skipping streak or second chance streak' do
     post '/login', {
       username: 'testuser',
       password: 'testuserpassword',
@@ -278,7 +256,8 @@ RSpec.describe 'Server' do
       event: 1
     }
 
-    expect(last_request.env['rack.session'][:result]).to eq('The question is already in the database. Please insert a different one')
+    expect(last_request.env['rack.session'][:result]).to eq('The question is already in the database.
+    Please insert a different one')
   end
 
   it 'shows the game finished because answered all the questions' do

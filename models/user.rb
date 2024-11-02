@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# models/user.rb
-
 require 'bcrypt'
 require 'securerandom'
+
+# models/user.rb
 class User < ActiveRecord::Base
   before_create :set_default_score
   has_secure_password
