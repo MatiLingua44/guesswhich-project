@@ -5,14 +5,14 @@ ENV['APP_ENV'] = 'test'
 require 'simplecov'
 SimpleCov.start
 
-require_relative '../app'
-require_relative '../models/user'
 require 'rspec'
 require 'rack/test'
+require_relative '../controllers/main_controller'
+require_relative '../app'
+require_relative '../models/user'
 
-RSpec.describe 'Server' do
+RSpec.describe 'GameController' do
   include Rack::Test::Methods
-
   def app
     App.new
   end
