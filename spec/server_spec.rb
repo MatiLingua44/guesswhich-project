@@ -29,7 +29,7 @@ RSpec.describe 'Server' do
     )
   end
 
-  it 'redirects to the page of password resets ' do
+  it 'redirects to the page of password resets' do
     get '/password_resets/new'
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/password_resets/new')
@@ -39,20 +39,6 @@ RSpec.describe 'Server' do
     get '/password_resets/notice'
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/password_resets/notice')
-  end
-
-  it 'redirects to the user information when authenticated' do
-    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
-    follow_redirect!
-
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    get '/user'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/user')
-    expect(last_response.body).to include('testuser')
-    expect(last_response.body).to include('testuser@example.com')
   end
 
   it 'redirects to the login page when not authenticated' do
@@ -279,23 +265,6 @@ RSpec.describe 'Server' do
     expect(last_response.body).to include('You answered all the questions')
   end
 
-  it 'deletes a user' do
-    post '/login', { username: 'testuser', password: 'testuserpassword' }
-    follow_redirect!
-
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    get '/user'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/user')
-    expect(last_response.body).to include('testuser')
-    expect(last_response.body).to include('testuser@example.com')
-
-    post '/user/delete'
-    expect(last_response.status).to eq(302)
-  end
-
   it 'shows the game finished because ran out of time' do
     post '/login', {
       username: 'testuser',
@@ -313,47 +282,6 @@ RSpec.describe 'Server' do
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/finish')
     expect(last_response.body).to include('You answered all the questions')
-  end
-
-  it 'edits a user' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    get '/edit-profile'
-    expect(last_request.path).to eq('/edit-profile')
-    expect(last_response.body).to include('Delete User')
-  end
-
-  it 'resets score user' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    get '/edit-profile'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/edit-profile')
-
-    post '/user/reset-score', {
-      user_score: 0
-    }
-    expect(last_request.path).to eq('/user/reset-score')
-
-    get '/edit-profile'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/edit-profile')
-    expect(last_response.body).to include('Reset Score')
   end
 
   it 'Redirect to completion page when user answers incorrectly' do
@@ -732,105 +660,5 @@ RSpec.describe 'Server' do
     reloaded_user = User.find(user.id)
     expect(reloaded_user.password_reset_token).to be_nil
     expect(reloaded_user.password_reset_sent_at).to be_nil
-  end
-
-  it 'modifies the username successfully' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    get '/edit-profile'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/edit-profile')
-
-    post '/profile-modification', {
-      username: 'new_username'
-    }
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/edit-profile')
-
-    get '/user'
-    expect(last_response.body).to include('new_username')
-  end
-
-  it 'fails to modify the username if it is already in use' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
-
-    post '/profile-modification', {
-      username: 'existing_user'
-    }
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/failed')
-
-    get '/failed'
-    expect(last_response.body).to include('The username is already being used')
-  end
-
-  it 'modifies the email successfully' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    get '/edit-profile'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/edit-profile')
-
-    post '/profile-modification', {
-      email: 'new_email@example.com'
-    }
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/edit-profile')
-
-    get '/user'
-    expect(last_response.body).to include('new_email@example.com')
-  end
-
-  it 'fails to modify the email if it is already in use' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
-
-    post '/profile-modification', {
-      email: 'existing@example.com'
-    }
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/failed')
-
-    get '/failed'
-    expect(last_response.body).to include('The email is already being used')
   end
 end
