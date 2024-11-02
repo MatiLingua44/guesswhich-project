@@ -72,7 +72,7 @@ class QuestionController < Sinatra::Base
     event = session[:selected_event]
     existing_question = Question.find_by(description: question)
     if existing_question
-      @result = session[:result] = 'The question is already in the database. Please insert a different one'
+      @result = session[:result] = 'The question is already in the database.'
 
     else
       question = Question.create(description: question, event: event)
