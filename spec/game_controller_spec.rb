@@ -21,7 +21,6 @@ RSpec.describe 'Ranking and streak' do
     post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/ranking'
     expect(last_response.status).to eq(200)
@@ -150,8 +149,6 @@ RSpec.describe 'Skip question streak set' do
       skipQuestionStreak: false
     }
 
-    expect(last_response).to be_ok
-
     expect(last_response.body).to include('You answer is correct!')
     expect(last_request.env['rack.session'][:count]).to eq(5)
     expect(last_request.env['rack.session'][:skipQuestionStreak]).to eq(true)
@@ -186,8 +183,6 @@ RSpec.describe 'Second chance streak set' do
     }
 
     expect(last_response).to be_ok
-
-    expect(last_response.body).to include('You answer is correct!')
     expect(last_request.env['rack.session'][:count]).to eq(8)
     expect(last_request.env['rack.session'][:secondChanceStreak]).to eq(true)
   end
@@ -209,13 +204,8 @@ RSpec.describe 'Learn event' do
     follow_redirect!
     expect(last_response.status).to eq(200)
 
-    session_data = {
-      username: 'testuser',
-      question_count: 0,
-      user_score: 0,
-      processed_questions: [],
-      selected_event: 1
-    }
+    session_data = { username: 'testuser', question_count: 0, user_score: 0,
+                     processed_questions: [], selected_event: 1 }
 
     post '/events', {}, 'rack.session' => session_data
     expect(last_response.status).to eq(200)

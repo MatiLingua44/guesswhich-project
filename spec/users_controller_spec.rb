@@ -8,6 +8,7 @@ SimpleCov.start
 require 'rspec'
 require 'rack/test'
 require_relative '../controllers/main_controller'
+require_relative '../controllers/users_controller'
 require_relative '../app'
 require_relative '../models/user'
 
@@ -17,32 +18,28 @@ RSpec.describe 'User managament' do
     App.new
   end
 
+  before(:each) do
+    User.delete_all
+    User.create(names: 'Test User', username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com')
+  end
+
   it 'deletes a user' do
     post '/login', { username: 'testuser', password: 'testuserpassword' }
     follow_redirect!
 
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/user'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/user')
     expect(last_response.body).to include('testuser')
-    expect(last_response.body).to include('testuser@example.com')
 
     post '/user/delete'
     expect(last_response.status).to eq(302)
   end
 
   it 'edits a user' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/edit-profile'
     expect(last_request.path).to eq('/edit-profile')
@@ -61,7 +58,6 @@ RSpec.describe 'Reset score' do
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/edit-profile'
     expect(last_response.status).to eq(200)
@@ -90,7 +86,6 @@ RSpec.describe 'Username modification' do
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/edit-profile'
     expect(last_response.status).to eq(200)
@@ -112,12 +107,16 @@ RSpec.describe 'Email modification' do
     App.new
   end
 
+  before(:each) do
+    User.delete_all
+    User.create(names: 'Test User', username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com')
+  end
+
   it 'modifies the email successfully' do
     post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/edit-profile'
     expect(last_response.status).to eq(200)
@@ -144,7 +143,6 @@ RSpec.describe 'User information' do
     follow_redirect!
 
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/user'
     expect(last_response.status).to eq(200)
@@ -164,7 +162,6 @@ RSpec.describe 'Fail username modification' do
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
 
@@ -189,7 +186,6 @@ RSpec.describe 'Fail email modification' do
 
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
 

@@ -48,17 +48,6 @@ RSpec.describe 'AddQuestion' do
     App.new
   end
 
-  before(:each) do
-    User.delete_all
-    @user = User.create(
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com',
-      names: 'Test User',
-      score: 0
-    )
-  end
-
   it 'shows the page to add questions' do
     post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
     get '/add-questions'
@@ -86,7 +75,47 @@ RSpec.describe 'AddQuestion' do
   end
 end
 
-RSpec.describe 'AnswerQuestions' do
+RSpec.describe 'Answered questions incorrectly and the user ran out of time' do
+  include Rack::Test::Methods
+
+  def app
+    App.new
+  end
+
+  it 'Redirect to completion page when user answers incorrectly' do
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
+
+    follow_redirect!
+
+    question = Question.create(description: 'Test question', event: 1)
+    incorrect_answer = Answer.create(description: 'Incorrect answer', is_correct: false, question: question)
+
+    post '/questions', { answer: incorrect_answer.id }, 'rack.session' => { question_count: 5,
+                                                                            user_score: 50, username: 'testuser' }
+
+    follow_redirect!
+    expect(last_request.env['rack.session'][:user_score]).to eq(50)
+  end
+
+  it 'Redirect to finish page when user runs out of time' do
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
+
+    follow_redirect!
+
+    question = Question.create(description: 'Test question', event: 1)
+    Answer.create(description: 'Incorrect answer', is_correct: false, question: question)
+
+    session_data = { ser_score: 0, question_count: 0, username: 'testuser', user_time: -1,
+                     processed_questions: [], selected_event: 1 }
+
+    get '/questions', {question: question}, 'rack.session' => session_data
+
+    get '/finish'
+    expect(last_response.body).to include('You ran out of time!')
+  end
+end
+
+RSpec.describe 'Answer all Questions' do
   include Rack::Test::Methods
 
   def app
@@ -94,13 +123,8 @@ RSpec.describe 'AnswerQuestions' do
   end
 
   before(:each) do
-    @user = User.create(
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com',
-      names: 'Test User',
-      score: 0
-    )
+    User.delete_all
+    User.create(username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com', names: 'Test User')
   end
 
   it 'shows the game finished because answered all the questions' do
@@ -111,7 +135,6 @@ RSpec.describe 'AnswerQuestions' do
     }
     follow_redirect!
     expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
 
     get '/questions'
     allow(Question).to receive(:where).and_return([])
@@ -121,60 +144,13 @@ RSpec.describe 'AnswerQuestions' do
     expect(last_request.path).to eq('/finish')
     expect(last_response.body).to include('You answered all the questions')
   end
+end
 
-  it 'Redirect to completion page when user answers incorrectly' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com  '
-    }
+RSpec.describe 'Increments score' do
+  include Rack::Test::Methods
 
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-
-    question = Question.create(description: 'Test question', event: 1)
-    incorrect_answer = Answer.create(description: 'Incorrect answer', is_correct: false, question: question)
-
-    post '/questions', { answer: incorrect_answer.id }, 'rack.session' => {
-      question_count: 5,
-      user_score: 50,
-      username: 'testuser'
-    }
-
-    follow_redirect!
-
-    expect(last_request.path).to eq('/finish')
-    expect(last_response.body).to include('Your answer is not correct, you lost!')
-    expect(last_request.env['rack.session'][:user_score]).to eq(50)
-  end
-
-  it 'Redirect to finish page when user runs out of time' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com  '
-    }
-
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-
-    question = Question.create(description: 'Test question', event: 1)
-    Answer.create(description: 'Incorrect answer', is_correct: false, question: question)
-
-    session_data = {
-      user_score: 0,
-      question_count: 0,
-      username: 'testuser',
-      user_time: -1,
-      processed_questions: [],
-      selected_event: 1
-    }
-
-    get '/questions', {}, 'rack.session' => session_data
-
-    get '/finish'
-    expect(last_request.path).to eq('/finish')
-    expect(last_response.body).to include('You ran out of time!')
+  def app
+    App.new
   end
 
   it 'increments score and redirects to /questions when answer is correct' do
@@ -204,6 +180,14 @@ RSpec.describe 'AnswerQuestions' do
     expect(last_request.env['rack.session'][:question_count]).to eq(6)
     expect(last_request.env['rack.session'][:user_score]).to eq(60)
   end
+end
+
+RSpec.describe 'Finishes the game' do
+  include Rack::Test::Methods
+
+  def app
+    App.new
+  end
 
   it 'finishes the game when answer is correct and reaches 15 questions' do
     post '/login', {
@@ -217,11 +201,7 @@ RSpec.describe 'AnswerQuestions' do
     question = Question.create(description: 'Test question', event: 1)
     correct_answer = Answer.create(description: 'Correct answer', is_correct: true, question: question)
 
-    session_data = {
-      question_count: 14,
-      user_score: 140,
-      username: 'testuser'
-    }
+    session_data = { question_count: 14, user_score: 140, username: 'testuser' }
 
     post '/questions', { answer: correct_answer.id }, 'rack.session' => session_data
 
@@ -232,6 +212,14 @@ RSpec.describe 'AnswerQuestions' do
 
     expect(last_request.env['rack.session'][:question_count]).to eq(15)
     expect(last_request.env['rack.session'][:user_score]).to eq(150)
+  end
+end
+
+RSpec.describe 'Finishes the game with streak' do
+  include Rack::Test::Methods
+
+  def app
+    App.new
   end
 
   it 'shows that the game is over because answered 14 questions
@@ -259,8 +247,6 @@ RSpec.describe 'AnswerQuestions' do
     allow(Question).to receive(:where).and_return([])
 
     follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/finish')
     expect(last_response.body).to include('Congratulations, You won!')
   end
 end

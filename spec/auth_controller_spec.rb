@@ -102,6 +102,11 @@ RSpec.describe 'Registration error due to mismatched passwords or email already 
     App.new
   end
 
+  before(:each) do
+    User.delete_all
+    User.create(names: 'Test User', username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com')
+  end
+
   it 'signs up with mismatched passwords' do
     post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2',
                       email: 'testuserNew@example.com', names: 'Test User New'
@@ -112,7 +117,7 @@ RSpec.describe 'Registration error due to mismatched passwords or email already 
   end
 
   it 'fails to sign up with a used email' do
-    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword2',
+    post '/register', username: 'testuserNew', password: 'testuserpassword1', confirm_password: 'testuserpassword1',
                       email: 'testuser@example.com', names: 'Test User New'
     expect(last_response.status).to eq(302)
     follow_redirect!
