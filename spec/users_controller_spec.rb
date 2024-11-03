@@ -11,34 +11,10 @@ require_relative '../controllers/main_controller'
 require_relative '../app'
 require_relative '../models/user'
 
-RSpec.describe 'UsersController' do
+RSpec.describe 'User managament' do
   include Rack::Test::Methods
   def app
     App.new
-  end
-
-  before(:each) do
-    @user = User.create(
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com',
-      names: 'Test User',
-      score: 0
-    )
-  end
-
-  it 'redirects to the user information when authenticated', :aggregate_failures do
-    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
-    follow_redirect!
-
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    get '/user'
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/user')
-    expect(last_response.body).to include('testuser')
-    expect(last_response.body).to include('testuser@example.com')
   end
 
   it 'deletes a user' do
@@ -72,13 +48,16 @@ RSpec.describe 'UsersController' do
     expect(last_request.path).to eq('/edit-profile')
     expect(last_response.body).to include('Delete User')
   end
+end
+
+RSpec.describe 'Reset score' do
+  include Rack::Test::Methods
+  def app
+    App.new
+  end
 
   it 'resets score user' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
 
     follow_redirect!
     expect(last_response.status).to eq(200)
@@ -98,13 +77,16 @@ RSpec.describe 'UsersController' do
     expect(last_request.path).to eq('/edit-profile')
     expect(last_response.body).to include('Reset Score')
   end
+end
+
+RSpec.describe 'Username modification' do
+  include Rack::Test::Methods
+  def app
+    App.new
+  end
 
   it 'modifies the username successfully' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
 
     follow_redirect!
     expect(last_response.status).to eq(200)
@@ -114,9 +96,7 @@ RSpec.describe 'UsersController' do
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/edit-profile')
 
-    post '/profile-modification', {
-      username: 'new_username'
-    }
+    post '/profile-modification', { username: 'new_username' }
     follow_redirect!
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/edit-profile')
@@ -124,37 +104,16 @@ RSpec.describe 'UsersController' do
     get '/user'
     expect(last_response.body).to include('new_username')
   end
+end
 
-  it 'fails to modify the username if it is already in use' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
-
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/menu')
-
-    User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
-
-    post '/profile-modification', {
-      username: 'existing_user'
-    }
-    follow_redirect!
-    expect(last_response.status).to eq(200)
-    expect(last_request.path).to eq('/failed')
-
-    get '/failed'
-    expect(last_response.body).to include('The username is already being used')
+RSpec.describe 'Email modification' do
+  include Rack::Test::Methods
+  def app
+    App.new
   end
 
   it 'modifies the email successfully' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
 
     follow_redirect!
     expect(last_response.status).to eq(200)
@@ -164,9 +123,7 @@ RSpec.describe 'UsersController' do
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/edit-profile')
 
-    post '/profile-modification', {
-      email: 'new_email@example.com'
-    }
+    post '/profile-modification', { email: 'new_email@example.com' }
     follow_redirect!
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/edit-profile')
@@ -174,13 +131,36 @@ RSpec.describe 'UsersController' do
     get '/user'
     expect(last_response.body).to include('new_email@example.com')
   end
+end
 
-  it 'fails to modify the email if it is already in use' do
-    post '/login', {
-      username: 'testuser',
-      password: 'testuserpassword',
-      email: 'testuser@example.com'
-    }
+RSpec.describe 'User information' do
+  include Rack::Test::Methods
+  def app
+    App.new
+  end
+
+  it 'redirects to the user information when authenticated' do
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
+    follow_redirect!
+
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    get '/user'
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/user')
+    expect(last_response.body).to include('testuser')
+  end
+end
+
+RSpec.describe 'Fail username modification' do
+  include Rack::Test::Methods
+  def app
+    App.new
+  end
+
+  it 'fails to modify the username if it is already in use' do
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
 
     follow_redirect!
     expect(last_response.status).to eq(200)
@@ -188,9 +168,32 @@ RSpec.describe 'UsersController' do
 
     User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
 
-    post '/profile-modification', {
-      email: 'existing@example.com'
-    }
+    post '/profile-modification', { username: 'existing_user' }
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/failed')
+
+    get '/failed'
+    expect(last_response.body).to include('The username is already being used')
+  end
+end
+
+RSpec.describe 'Fail email modification' do
+  include Rack::Test::Methods
+  def app
+    App.new
+  end
+
+  it 'fails to modify the email if it is already in use' do
+    post '/login', { username: 'testuser', password: 'testuserpassword', email: 'testuser@example.com' }
+
+    follow_redirect!
+    expect(last_response.status).to eq(200)
+    expect(last_request.path).to eq('/menu')
+
+    User.create(username: 'existing_user', email: 'existing@example.com', password: 'password')
+
+    post '/profile-modification', { email: 'existing@example.com' }
     follow_redirect!
     expect(last_response.status).to eq(200)
     expect(last_request.path).to eq('/failed')
