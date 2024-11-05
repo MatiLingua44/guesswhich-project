@@ -258,13 +258,13 @@
   </div>
 
    <div id="streak-container">
-        <% if @extraTimeStreak %>
+        <% if @extra_time_streak %>
            <button id="streak-item1" onclick="handleClick('extraTimeStreak')">Extra Time</button>
        <% end %>
-        <% if @skipQuestionStreak %>
+        <% if @skip_question_streak %>
              <button id="streak-item2" onclick="handleClick('skipQuestionStreak')">Skip Question</button>
         <% end %>
-        <% if @secondChanceStreak %>
+        <% if @second_chance_streak %>
             <button id="streak-item3">Second Chance</button>
         <% end %>
     </div>

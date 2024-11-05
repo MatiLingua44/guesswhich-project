@@ -72,16 +72,13 @@
   <h1>You answer is correct!</h1>
   <div class="game-stats">
     <p><strong>Score:</strong> <%= @score %></p>
-    <% puts @streak1%>
-    <% puts @streak2%>
-    <% puts @streak3%>
-    <% if @extraTimeStreak %>
+    <% if @extra_time_streak %>
       <p><strong>Extra Time :</strong> 🔥</p>
     <% end %>
-    <% if @skipQuestionStreak %>
+    <% if @skip_question_streak %>
       <p><strong>Skip Question:</strong> 🔥🔥</p>
     <% end %>
-    <% if @secondChanceStreak %>
+    <% if @second_chance_streak %>
       <p><strong>Second Chance:</strong> 🔥🔥🔥</p>
     <% end %>
   </div>
