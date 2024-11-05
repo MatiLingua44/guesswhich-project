@@ -1,4 +1,8 @@
+# frozen_string_literal: true
+
+# Migration to create users table
 class CreateUsersTable < ActiveRecord::Migration[7.1]
+  # rubocop:disable Metrics/MethodLength
   def change
     create_table :users do |t|
       t.string :names
@@ -13,4 +17,5 @@ class CreateUsersTable < ActiveRecord::Migration[7.1]
       t.datetime :updated_at
     end
   end
+  # rubocop:enable Metrics/MethodLength
 end

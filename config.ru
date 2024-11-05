@@ -1,4 +1,6 @@
+# frozen_string_literal: true
+
 # config.ru
 
-require './server'
+require './app'
 run App

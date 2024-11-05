@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 # Gemfile
-ruby '3.3.4'
+ruby '3.0.2'
 
 # frozen_string_literal: true
 
@@ -7,16 +9,16 @@ source 'https://rubygems.org'
 
 # gem "rails"
 
-gem 'sinatra'
-gem 'rackup'
 gem 'activerecord'
-gem 'sinatra-activerecord'
-gem 'sqlite3', '~> 1.4'
+gem 'bcrypt'
+gem 'mail'
+gem 'rack-test'
+gem 'rackup'
 gem 'rake'
 gem 'rspec'
-gem 'rack-test'
-gem 'mail'
-gem 'bcrypt'
+gem 'rubocop-rake', '>= 0', group: :development
+gem 'rubocop-rspec', '>= 0', group: :development
 gem 'simplecov', require: false
-
-
+gem 'sinatra'
+gem 'sinatra-activerecord'
+gem 'sqlite3', '~> 1.4'
