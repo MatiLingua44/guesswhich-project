@@ -108,7 +108,7 @@ RSpec.describe 'Answered questions incorrectly and the user ran out of time' do
     session_data = { ser_score: 0, question_count: 0, username: 'testuser', user_time: -1,
                      processed_questions: [], selected_event: 1 }
 
-    get '/questions', {question: question}, 'rack.session' => session_data
+    get '/questions', { question: question }, 'rack.session' => session_data
 
     get '/finish'
     expect(last_response.body).to include('You ran out of time!')
